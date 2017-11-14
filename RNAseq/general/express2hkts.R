@@ -1,5 +1,5 @@
 # HK TS gene selected and visualization
-# zxchen 2016-07-11 
+# zxchen 2016-07-11
 
 library("entropy")
 library("ggplot2")
@@ -36,9 +36,9 @@ Cluster = cutree(hclust, k = 13)
 express_data = as.data.frame(express_data)
 express_data$cluster = Cluster
 ggData = melt(express_data,id="cluster")
-ggplot(ggData, aes(x=variable, y=value)) + geom_point(size=1)  + 
+ggplot(ggData, aes(x=variable, y=value)) + geom_point(size=1)  +
   geom_boxplot()  + facet_wrap(~cluster, scales = "free",ncol = 2)
-  
+
 
 
 
@@ -67,17 +67,17 @@ for (ts in TissueGroup)
 {
   Tissue = subset(sampleInf,Tissue==ts,Sample)
   TissueIndex = as.numeric(rownames(Tissue))
-  
+
   group_a = geneExpressLog2[,TissueIndex]
   group_b = geneExpressLog2[,-TissueIndex]
-  
+
   # Tissue group mean value
   Tissue_expr[,ts] = apply(group_a,1,mean)
-  
+
   # TS selected by expression cutoff
   folder = apply(group_a+0.1,1,mean)/apply(group_b+0.1,1,max)
   folder_list = c(folder_list,rownames(geneExpressLog2[folder>cutoff,]))
-  
+
   # TS selected by Zscore
   Zscore = scale(geneExpressLog2,scale = T,center = F)
   Zscore_a = Zscore[,TissueIndex]
@@ -86,7 +86,7 @@ for (ts in TissueGroup)
   zscore_list = c(zscore_list,rownames(geneExpressLog2[Zscore_s,]))
 }
 
-# Golble variant 
+# Golble variant
 expr_mean = apply(geneExpressLog2,2,mean)
 expr_avr = apply(geneExpressLog2,1,mean)
 expr_max = apply(geneExpressLog2,1,max)
@@ -109,7 +109,7 @@ ZS_ts_expr = geneExpressLog2[zscore_list,]
 folder_mean = Tissue_expr[folder_list,]
 zscore_mean = Tissue_expr[zscore_list,]
 
-Hcluster = hclust(dist(t(Tissue_expr))) 
+Hcluster = hclust(dist(t(Tissue_expr)))
 
 save(Tissue_expr,express_data,ggData,Hcluster,sampleInf,zscore_data,folder_data,zscore_mean,folder_mean,file = "heatmap.RDATA")
 
