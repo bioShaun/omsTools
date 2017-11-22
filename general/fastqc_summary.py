@@ -25,19 +25,19 @@ def get_sample_name(filename, names):
     help='fastqc directory.')
 @click.option(
     '-n',
-    '--name_map',
+    '--names',
     type=click.Path(dir_okay=False),
     required=True,
-    help='sample name vs fastqc zip file.')
+    help='sample name file.')
 @click.option(
     '-o',
     '--output',
     default='fastqc.summary.txt',
     type=click.Path(dir_okay=False),
     help='output summary file path.')
-def main(qc_dir, name_map, output):
+def main(qc_dir, names, output):
     qc_dict = dict()
-    sample_names = [each.strip() for each in open(name_map) if each.strip()]
+    sample_names = [each.strip() for each in open(names) if each.strip()]
     fastqc_files = [each for each in os.listdir(
         qc_dir) if each.endswith('.zip')]
     for each_file in fastqc_files:
