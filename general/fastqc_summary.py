@@ -3,6 +3,7 @@ from crimson import fastqc
 import re
 import os
 import pandas as pd
+import glob
 
 
 def get_sample_name(filename, names):
@@ -40,9 +41,21 @@ def main(qc_dir, names, output):
     sample_names = [each.strip() for each in open(names) if each.strip()]
     fastqc_files = [each for each in os.listdir(
         qc_dir) if each.endswith('.zip')]
+    if not fastqc_files:
+        fastqc_files = glob.glob('{d}/*fastqc/fastqc_data.txt'.format(
+            d=qc_dir))
+        if not fastqc_files:
+            sys.exit('Can not find fastqc result in [{d}].'.format(
+                d=qc_dir))
     for each_file in fastqc_files:
-        each_file_path = os.path.join(qc_dir, each_file)
-        sample_name = get_sample_name(each_file, sample_names)
+        if each_file[-4:] == '.zip':
+            each_file_path = os.path.join(qc_dir, each_file)
+            sample_name = get_sample_name(each_file, sample_names)
+        else:
+            each_file_path = each_file
+            each_file_dir = os.path.basename(os.path.dirname(each_file))
+            print each_file_dir
+            sample_name = get_sample_name(each_file_dir, sample_names)
         each_qc = fastqc.parse(each_file_path)
         reads_num = each_qc['Basic Statistics']['contents']['Total Sequences']
         reads_len = max([each['Length'] for each in
