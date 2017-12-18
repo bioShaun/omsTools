@@ -43,26 +43,34 @@ def _oms_lncRNA_classify(feelnc_prd, lnc_gtf, method='Luo'):
     '''
     feelnc_df = pd.read_table(feelnc_prd, index_col=2)
     feelnc_best_df = feelnc_df[feelnc_df.isBest == 1]
-    lnc_class_df = feelnc_best_df.loc[:, feelnc_best_df.columns[1:]]
-    lnc_class_df.loc[:, 'classification'] = None
+    feelnc_best_df = feelnc_best_df.loc[:, feelnc_best_df.columns[1:]]
+    lnc_class_df = pd.DataFrame([], columns=feelnc_best_df.columns)
+    lnc_class_list = list()
     for eachline in GFF_Reader(lnc_gtf):
         tr_id = eachline.attr['transcript_id']
         gene_id = eachline.attr['gene_id']
         if tr_id in lnc_class_df.index:
-            if not lnc_class_df.loc[tr_id, 'classification'] is None:
-                continue
+            continue
+        if tr_id in feelnc_best_df.index:
             if method == 'Luo':
-                dirt, ltype, dis, subtype, loc = lnc_class_df.loc[tr_id][3:-1]
+                dirt, ltype, dis, subtype, loc = feelnc_best_df.loc[tr_id][3:]
                 lnc_class = _get_luo_code(dirt, subtype, loc)
-                lnc_class_df.loc[tr_id, 'classification'] = lnc_class
+                lnc_class_list.append(lnc_class)
+                lnc_class_df.loc[tr_id] = feelnc_best_df.loc[tr_id]
             else:
                 sys.exit('undefined classification method.')
         else:
             class_detail = ['--' for each in lnc_class_df.columns]
             class_detail[0] = gene_id
-            class_detail[-1] = 'lincRNA'
+            lnc_class_list.append('lincRNA')
             lnc_class_df.loc[tr_id] = class_detail
+    lnc_class_df.loc[:, 'classification'] = lnc_class_list
+    lnc_class_df.index.name = feelnc_best_df.index.name
     return lnc_class_df
+
+
+def _oms_add_lncRNA_type(l):
+    pass
 
 
 def _get_luo_code(*fee_loc):
@@ -125,14 +133,26 @@ def main(mrna, lncrna, out_dir, distance):
     '''
     classify lncRNA according to it's position relative to mRNA
     '''
-    feelnc_out = os.path.join(out_dir, 'feelnc.classification.txt')
-    if not os.path.exists(feelnc_out):
-        output = _oms_lncRNA_feelnc(mrna, lncrna, distance)
-        with open(feelnc_out, 'w') as out_inf:
-            out_inf.write(output)
-    lnc_class_df = _oms_lncRNA_classify(feelnc_out, lncrna)
+    # check result existence
     lnc_class_out = os.path.join(out_dir, 'lncRNA.classification.txt')
-    lnc_class_df.to_csv(lnc_class_out, sep='\t')
+    if os.path.exists(lnc_class_out):
+        click.echo('oms_lncRNA_classify will not run, output exists!',
+                   color='orange')
+    else:
+        # run FEELnc_classifier
+        feelnc_out = os.path.join(out_dir, 'feelnc.classification.txt')
+        if not os.path.exists(feelnc_out):
+            click.echo('run FEELnc_classifier.', color='blue')
+            output = _oms_lncRNA_feelnc(mrna, lncrna, distance)
+            with open(feelnc_out, 'w') as out_inf:
+                out_inf.write(output)
+        else:
+            click.echo('FEELnc_classifier will not run, output exists!',
+                       color='orange')
+        # run lncRNA classify
+        click.echo('run oms_lncRNA_classify!', color='blue')
+        lnc_class_df = _oms_lncRNA_classify(feelnc_out, lncrna)
+        lnc_class_df.to_csv(lnc_class_out, sep='\t')
 
 
 if __name__ == '__main__':
