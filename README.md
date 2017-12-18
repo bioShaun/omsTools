@@ -15,7 +15,7 @@ A number of scripts will be added to OM004script not long. My suggestion is to i
 
 Create a venv folder and activate the environment.
 
-```
+```bash
 cd /path/to/your/environment/
 mkdir om004_venv
 virtualenv om004_venv
@@ -24,19 +24,19 @@ virtualenv om004_venv
 
 
 Download source code.
-```
+```bash
 cd /path/to/your/download/
 git clone https://github.com/bioShaun/OM004script.git
 ```
 
 Install OM004script.
-```
+```bash
 cd /path/to/your/download/OM004script
 pip install -e .
 ```
 
 Update OM004script.
-```
+```bash
 # remember to activate your virtual environment first.
 cd /path/to/your/download/OM004script
 git pull origin master
@@ -47,8 +47,7 @@ pip install -e .
 
 After installation, input following command will output the usage of the script you need.
 
-```
+```bash
 name_of_script --help
 ```
-
-## 
+ 
