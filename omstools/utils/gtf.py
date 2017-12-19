@@ -28,9 +28,103 @@ GTF_EMPTY_FIELD = '.'
 GTF_ATTR_SEP = ';'
 GTF_ATTR_TAGVALUE_SEP = ' '
 
+# Map GENCODE gene type to overarching categories
+GENCODE_CATEGORY_MAP = {
+    'IG_C_gene': 'protein_coding',
+    'IG_D_gene': 'protein_coding',
+    'IG_J_gene': 'protein_coding',
+    'IG_V_gene': 'protein_coding',
+    'IG_LV_gene': 'protein_coding',
+    'TR_C_gene': 'protein_coding',
+    'TR_J_gene': 'protein_coding',
+    'TR_V_gene': 'protein_coding',
+    'TR_D_gene': 'protein_coding',
+    'TEC': 'protein_coding',
+    'nonsense_mediated_decay': 'protein_coding',
+    'non_stop_decay': 'protein_coding',
+    'retained_intron': 'protein_coding',
+    'protein_coding': 'protein_coding',
+    'ambiguous_orf': 'protein_coding',
+    'Mt_rRNA': 'ncRNA',
+    'Mt_tRNA': 'ncRNA',
+    'miRNA': 'ncRNA',
+    'misc_RNA': 'ncRNA',
+    'rRNA': 'ncRNA',
+    'snRNA': 'ncRNA',
+    'snoRNA': 'ncRNA',
+    'ribozyme': 'ncRNA',
+    'sRNA': 'ncRNA',
+    'scaRNA': 'ncRNA',
+    'scRNA': 'ncRNA',
+    'non_coding': 'ncRNA',
+    'known_ncrna': 'ncRNA',
+    '3prime_overlapping_ncrna': 'ncRNA',
+    'vaultRNA': 'ncRNA',
+    'processed_transcript': 'lncRNA',
+    'lincRNA': 'lncRNA',
+    'macro_lncRNA': 'lncRNA',
+    'sense_intronic': 'lncRNA',
+    'sense_overlapping': 'lncRNA',
+    'antisense': 'lncRNA',
+    'antisense_RNA': 'lncRNA',
+    'bidirectional_promoter_lncRNA': 'lncRNA',
+    'IG_pseudogene': 'pseudogene',
+    'IG_C_pseudogene': 'pseudogene',
+    'IG_J_pseudogene': 'pseudogene',
+    'IG_V_pseudogene': 'pseudogene',
+    'TR_V_pseudogene': 'pseudogene',
+    'TR_J_pseudogene': 'pseudogene',
+    'Mt_tRNA_pseudogene': 'pseudogene',
+    'tRNA_pseudogene': 'pseudogene',
+    'snoRNA_pseudogene': 'pseudogene',
+    'snRNA_pseudogene': 'pseudogene',
+    'scRNA_pseudogene': 'pseudogene',
+    'rRNA_pseudogene': 'pseudogene',
+    'misc_RNA_pseudogene': 'pseudogene',
+    'miRNA_pseudogene': 'pseudogene',
+    'pseudogene': 'pseudogene',
+    'processed_pseudogene': 'pseudogene',
+    'polymorphic_pseudogene': 'pseudogene',
+    'retrotransposed': 'pseudogene',
+    'transcribed_processed_pseudogene': 'pseudogene',
+    'transcribed_unprocessed_pseudogene': 'pseudogene',
+    'transcribed_unitary_pseudogene': 'pseudogene',
+    'translated_processed_pseudogene': 'pseudogene',
+    'translated_unprocessed_pseudogene': 'pseudogene',
+    'unitary_pseudogene': 'pseudogene',
+    'unprocessed_pseudogene': 'pseudogene',
+    'XH': 'lncRNA',
+    'XT': 'lncRNA',
+    'SD': 'lncRNA',
+    'SII': 'lncRNA',
+    'SOI': 'lncRNA',
+    'SPI': 'lncRNA',
+    'SU': 'lncRNA',
+    'XIE': 'lncRNA',
+    'XII': 'lncRNA',
+    'XOE': 'lncRNA',
+    'XOI': 'lncRNA',
+    'XPE': 'lncRNA',
+    'XPI': 'lncRNA',
+}
+
+# gene_type classify priority
+
+GENE_TYPE_PRIORITY = ('protein_coding', 'pseudogene', 'TUCP', 'lncRNA',
+                      'ncRNA')
+
 
 class GTFError(Exception):
     pass
+
+
+def get_gene_type(tr_types):
+    ''' label gene type according to GENE_TYPE_PRIORITY '''
+    for each_type in tr_types:
+        each_type = GENCODE_CATEGORY_MAP.get(each_type, each_type)
+        if each_type in GENE_TYPE_PRIORITY:
+            return each_type
+    return 'unknown'
 
 
 def sort_gtf(filename, output_file, tmp_dir=None):

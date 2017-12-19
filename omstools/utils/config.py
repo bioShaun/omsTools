@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-""" omsTools config module. """
+""" omsTools config """
 
 import pkg_resources
 
