@@ -8,6 +8,7 @@ Currently it includes following scripts:
 Name | Function |
 --------------------| ----------------------------------------|
 oms_lncRNA_classify |Classify lncRNA according to its relative location to mRNA|
+oms_gtf_split| Split gtf file according to its field or attribute|
 
 ## Installation
 
