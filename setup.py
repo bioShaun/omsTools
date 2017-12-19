@@ -11,7 +11,7 @@ Installing omsTools version {v}
 
 
 setup(
-    name='omsTools',
+    name='omstools',
     version=version,
     author='lx Gui',
     author_email='guilixuan@gmail.cn',
@@ -23,15 +23,20 @@ setup(
         'envoy',
         'pandas',
         'HTSeq',
-        'click'
+        'click',
+        'distribute'
     ],
     entry_points={
         'console_scripts': [
-            "oms_lncRNA_classify=RNAseq.lncRNA.classify.lncRNA_classify:main"
-        ]
+            "oms_lncRNA_classify=omstools.RNAseq.lncRNA.classify.lncRNA_classify:main",
+            "oms_gtf_split=omstools.general.gtf_split:main",
+        ],
         'gtf': [
-            "transcripts_from_gtf_lines=general.transcript:transcripts_from_gtf_lines",
-            "strand_int_to_str=general.transcript:strand_int_to_str"
+            "func_tr_from_gtf_lines=omstools.utils.transcript:transcripts_from_gtf_lines",
+            "func_strand_int_to_str=omstools.utils.transcript:strand_int_to_str",
+            "dict_GENCODE_CATEGORY_MAP=omstools.utils.transcript:GENCODE_CATEGORY_MAP",
+            "func_parse_gtf=omstools.utils.transcript:parse_gtf",
+            "class_GTFFeature=omstools.utils.gtf:GTFFeature",
         ]
     }
 
