@@ -3,16 +3,12 @@ from HTSeq import GFF_Reader
 import os
 import click
 import pandas as pd
+from omstools.utils.config import CLICK_CONTEXT_SETTINGS
+from omstools.utils.config import gtf_tools
 try:
     import envoy
 except ImportError:
     import subprocess
-import pkg_resources
-
-
-avail_modules = dict()
-for entry_point in pkg_resources.iter_entry_points('gtf'):
-    avail_modules.update({entry_point.name: entry_point.load()})
 
 
 CURRENT_DIR = os.getcwd()
@@ -33,8 +29,8 @@ def oms_lncRNA_feelnc(mrna, lncrna, dis=5000):
     run FEElnc_classifier.pl to get lncRNA position relative to mRNA
     in order to classify them.
     '''
-    cmd_line = 'FEELnc_classifier.pl -i {l} -a {m} -w {d} -m {d}'.format(
-        l=lncrna, m=mrna, d=dis
+    cmd_line = 'FEELnc_classifier.pl -i {lnc} -a {m} -w {d} -m {d}'.format(
+        lnc=lncrna, m=mrna, d=dis
     )
     if 'envoy' in VARS:
         r = envoy.run(cmd_line)
@@ -84,18 +80,32 @@ def oms_lncRNA_classify(feelnc_prd, lnc_gtf, method='Luo'):
     return lnc_class_df
 
 
-def oms_add_lncRNA_type(mrna, lncrna, tucp, lnc_class_df, output):
-    with open(gtf) as gtf_inf:
-        for gene, tr_objs in avail_modules['parse_gtf'](gtf_inf, GTF_ATTR):
-            gene_type_set = set()
+def oms_add_lncRNA_type(lncrna, tucp, lnc_class_df, output):
+    merged_gtf = '{o}.tmp'.format(o=output)
+    gtf_tools['func_merge_sort_gtf_files']([lncrna, tucp], merged_gtf)
+    gene_dict = dict()
+    with open(merged_gtf) as gtf_inf:
+        for gene, tr_objs in gtf_tools['func_parse_gtf'](gtf_inf, GTF_ATTR):
+            tr_type_set = set()
             for each_tr in tr_objs:
                 tr_id = each_tr.attrs["transcript_id"]
-                tr_type = lnc_class_df.loc[tr_id, 'classification']
-                each_tr.attrs['transcript_type'] = tr_type
-                gene_type = avail_modules['GENCODE_CATEGORY_MAP'].get(tr_type, tr_type)
-                gene_type_set.add(gene_type)
-
-
+                if tr_id in lnc_class_df.index:
+                    tr_type = lnc_class_df.loc[tr_id, 'classification']
+                else:
+                    tr_type = 'TUCP'
+                each_tr.attrs['transcript_biotype'] = tr_type
+                tr_type_set.add(tr_type)
+            gene_type = gtf_tools['func_get_gene_type'](tr_type_set)
+            for each_tr in tr_objs:
+                each_tr.attrs['gene_biotype'] = gene_type
+                gene_dict.setdefault(gene, []).append(each_tr)
+    with open(output, 'w') as output_inf:
+        for gene in gene_dict:
+            for tr_obj in gene_dict[gene]:
+                tr_features = tr_obj.to_gtf_features()
+                for each_feature in tr_features:
+                    output_inf.write('{l_out}\n'.format(
+                        l_out=str(each_feature)))
 
 
 def get_luo_code(*fee_loc):
@@ -126,7 +136,7 @@ def get_luo_code(*fee_loc):
     return modify_dict.get(code, code)
 
 
-@click.command()
+@click.command(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.option(
     '-m',
     '--mrna',
@@ -168,6 +178,7 @@ def main(mrna, lncrna, tucp, out_dir, distance):
     '''
     # check result existence
     lnc_class_out = os.path.join(out_dir, 'lncRNA.classification.txt')
+    lnc_class_gtf = os.path.join(out_dir, 'lncRNA.classification.gtf')
     if os.path.exists(lnc_class_out):
         click.echo('oms_lncRNA_classify will not run, output exists!',
                    color='orange')
@@ -186,6 +197,7 @@ def main(mrna, lncrna, tucp, out_dir, distance):
         click.echo('run oms_lncRNA_classify!', color='blue')
         lnc_class_df = oms_lncRNA_classify(feelnc_out, lncrna)
         lnc_class_df.to_csv(lnc_class_out, sep='\t')
+        oms_add_lncRNA_type(lncrna, tucp, lnc_class_df, lnc_class_gtf)
 
 
 if __name__ == '__main__':
