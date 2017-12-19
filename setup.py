@@ -29,6 +29,10 @@ setup(
         'console_scripts': [
             "oms_lncRNA_classify=RNAseq.lncRNA.classify.lncRNA_classify:main"
         ]
+        'gtf': [
+            "transcripts_from_gtf_lines=general.transcript:transcripts_from_gtf_lines",
+            "strand_int_to_str=general.transcript:strand_int_to_str"
+        ]
     }
 
 )
