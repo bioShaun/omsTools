@@ -1,7 +1,7 @@
-# OM004script: A Tool Box for NGS analysis
+# omsTools: A Tool Box for NGS analysis
 
 
-OM004script is a collection of scripts for NGS (mainly for RNAseq) analysis.
+omsTools is a collection of scripts for NGS (mainly for RNAseq) analysis.
 
 Currently it includes following scripts:
 
@@ -11,7 +11,7 @@ oms_lncRNA_classify |Classify lncRNA according to its relative location to mRNA|
 
 ## Installation
 
-A number of scripts will be added to OM004script not long. My suggestion is to install OM004script in a virtual environment, so that you could keep up with the updating.
+A number of scripts will be added to omsTools not long. My suggestion is to install omsTools in a virtual environment, so that you could keep up with the updating.
 
 Create a venv folder and activate the environment.
 
@@ -26,19 +26,19 @@ virtualenv om004_venv
 Download source code.
 ```bash
 cd /path/to/your/download/
-git clone https://github.com/bioShaun/OM004script.git
+git clone https://github.com/bioShaun/omsTools.git
 ```
 
-Install OM004script.
+Install omsTools.
 ```bash
-cd /path/to/your/download/OM004script
+cd /path/to/your/download/omsTools
 pip install -e .
 ```
 
-Update OM004script.
+Update omsTools.
 ```bash
 # remember to activate your virtual environment first.
-cd /path/to/your/download/OM004script
+cd /path/to/your/download/omsTools
 git pull origin master
 pip install -e .
 ```
