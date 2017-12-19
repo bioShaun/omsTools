@@ -31,6 +31,9 @@ EXON_HEADER = [
 
 
 def get_gene_feature(tr_df):
+    '''
+    summarize gene feature according to transcript feature table
+    '''
     gene_chr = tr_df.groupby(['Gene_id'])['Chr'].first()
     gene_start = tr_df.groupby(['Gene_id'])['Start'].min()
     gene_end = tr_df.groupby(['Gene_id'])['End'].max()
@@ -51,6 +54,9 @@ def get_gene_feature(tr_df):
 
 
 def add_type(func):
+    '''
+    add transcript/gene biotype to gene/transcript feature table
+    '''
     def wrapper(gtf, biotype=False):
         if not biotype:
             return func(gtf)
@@ -86,6 +92,10 @@ def add_type(func):
 
 @add_type
 def gtf2feature(gtf, biotype=False):
+    '''
+    extract transcript/exon/intron basic information from gtf
+    and store it to DataFrame
+    '''
     tr_feature_dict = dict()
     exon_intron_dict = dict()
     for gene, tr_objs in gtf_tools['func_parse_gtf'](gtf):
@@ -155,6 +165,9 @@ def gtf2feature(gtf, biotype=False):
     is_flag=True,
 )
 def main(gtf, out_dir, biotype):
+    '''
+    Extract basic information of gene/transcript/exon/intron from gtf file
+    '''
     # insure out_dir exists
     save_mkdir(out_dir)
     # extract feature information from gtf file
