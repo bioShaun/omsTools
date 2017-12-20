@@ -24,8 +24,10 @@ setup(
         'pandas',
         'HTSeq',
         'click',
-        'distribute'
+        'distribute',
+        'tabulate'
     ],
+    scripts=['scripts/omstools'],
     entry_points={
         'console_scripts': [
             "oms_lncRNA_classify=omstools.RNAseq.lncRNA.classify.lncRNA_classify:main",
@@ -38,7 +40,7 @@ setup(
             "func_parse_gtf=omstools.utils.transcript:parse_gtf",
             "func_sort_gtf=omstools.utils.gtf:sort_gtf",
             "func_get_gene_type=omstools.utils.gtf:get_gene_type",
-            "func_get_tr_type=omstools.utils.gtf:get_gene_type",
+            "func_get_tr_type=omstools.utils.gtf:get_tr_type",
             "func_merge_sort_gtf_files=omstools.utils.gtf:merge_sort_gtf_files",
             "class_GTFFeature=omstools.utils.gtf:GTFFeature",
         ]

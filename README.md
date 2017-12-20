@@ -9,7 +9,7 @@ Name | Function |
 --------------------| ----------------------------------------|
 oms_lncRNA_classify |Classify lncRNA according to its relative location to mRNA|
 oms_gtf_split| Split gtf file according to its field or attribute|
-oms_transcript_feature|Extract basic information of gene/transcript/exon/intron from gtf file.|
+oms_transcript_feature|Extract basic information of gene/transcript/exon/intron from gtf file|
 
 ## Installation
 
@@ -47,9 +47,9 @@ pip install -e .
 
 ## Usage
 
-After installation, input following command will output the usage of the script you need.
+After installation, run `omstools` to find out all the available tools and their description. Input following command will output the usage of the specific script you need.
 
 ```bash
-name_of_script --help
+name_of_script -h
 ```
  

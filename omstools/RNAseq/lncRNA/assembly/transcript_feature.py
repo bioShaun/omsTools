@@ -165,8 +165,7 @@ def gtf2feature(gtf, biotype=False):
     is_flag=True,
 )
 def main(gtf, out_dir, biotype):
-    '''
-    Extract basic information of gene/transcript/exon/intron from gtf file
+    '''Extract basic information of gene/transcript/exon/intron from gtf file
     '''
     # insure out_dir exists
     save_mkdir(out_dir)

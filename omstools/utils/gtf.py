@@ -118,6 +118,10 @@ class GTFError(Exception):
     pass
 
 
+def get_tr_type(tr_type):
+    return GENCODE_CATEGORY_MAP.get(tr_type, tr_type)
+
+
 def get_gene_type(tr_types):
     ''' label gene type according to GENE_TYPE_PRIORITY '''
     for each_type in tr_types:

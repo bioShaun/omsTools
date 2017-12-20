@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+
+'''A collection of scripts for NGS (mainly for RNAseq) analysis.
+'''
+
+import pkg_resources
+import pandas as pd
+from tabulate import tabulate
+
+
+omstools_dict = dict()
+for entry_point in pkg_resources.iter_entry_points('console_scripts'):
+    each_module_inf = entry_point.module_name.split('.')
+    if each_module_inf[0] == 'omstools':
+        each_module_class = '|'.join(each_module_inf[1:-1])
+        each_module = entry_point.load()
+        each_module_doc = each_module.help
+        omstools_dict.setdefault('Name', []).append(entry_point.name)
+        omstools_dict.setdefault('Category', []).append(each_module_class)
+        omstools_dict.setdefault('Description', []).append(each_module_doc)
+
+omstools_df = pd.DataFrame(omstools_dict)
+omstools_df = omstools_df.sort_values(by=['Category', 'Name'])
+omstools_df = omstools_df.loc[:, ['Name', 'Category', 'Description']]
+
+print tabulate(omstools_df, headers='keys', tablefmt='psql')

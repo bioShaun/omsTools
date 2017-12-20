@@ -5,8 +5,6 @@ from omstools.utils.systools import save_mkdir
 from omstools.utils.config import gtf_tools
 from omstools.utils.config import CLICK_CONTEXT_SETTINGS
 
-GENCODE_CATEGORY = gtf_tools['dict_GENCODE_CATEGORY_MAP']
-
 
 def gtf_classifier(line, method):
     if 'attrs' in method:
@@ -16,7 +14,7 @@ def gtf_classifier(line, method):
         else:
             tag_value = line.attrs[tag]
             if 'type' in tag:
-                tag_value = GENCODE_CATEGORY.get(tag_value, 'unknown')
+                tag_value = gtf_tools['func_get_tr_type'](tag_value)
             return tag_value
     elif method == 'chr':
         return line.chrom
@@ -49,6 +47,8 @@ def gtf_classifier(line, method):
     help='directory to put splitted gtf files.'
 )
 def main(gtf, method, out_dir):
+    '''Split gtf file according to its field or attribute
+    '''
     save_mkdir(out_dir)
     gtf_split_dict = dict()
     with open(gtf) as gtf_inf:

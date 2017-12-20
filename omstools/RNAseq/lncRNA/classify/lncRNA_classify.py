@@ -106,6 +106,7 @@ def oms_add_lncRNA_type(lncrna, tucp, lnc_class_df, output):
                 for each_feature in tr_features:
                     output_inf.write('{l_out}\n'.format(
                         l_out=str(each_feature)))
+    os.remove(merged_gtf)
 
 
 def get_luo_code(*fee_loc):
@@ -173,8 +174,7 @@ def get_luo_code(*fee_loc):
     help='Directory to store classification output.'
 )
 def main(mrna, lncrna, tucp, out_dir, distance):
-    '''
-    classify lncRNA according to it's position relative to mRNA
+    '''classify lncRNA according to it's position relative to mRNA
     '''
     # check result existence
     lnc_class_out = os.path.join(out_dir, 'lncRNA.classification.txt')
