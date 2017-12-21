@@ -124,9 +124,12 @@ def get_tr_type(tr_type):
 
 def get_gene_type(tr_types):
     ''' label gene type according to GENE_TYPE_PRIORITY '''
-    for each_type in tr_types:
-        each_type = GENCODE_CATEGORY_MAP.get(each_type, each_type)
-        if each_type in GENE_TYPE_PRIORITY:
+    re_name_tr_types = [
+        GENCODE_CATEGORY_MAP.get(each_type, each_type)
+        for each_type in tr_types
+    ]
+    for each_type in GENE_TYPE_PRIORITY:
+        if each_type in re_name_tr_types:
             return each_type
     return 'unknown'
 

@@ -23,7 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import collections
 from gtf import parse_loci, GTFFeature, GTFError
 
-
 # attributes
 TRANSCRIPT_ID = "transcript_id"
 GENE_ID = "gene_id"
@@ -142,6 +141,37 @@ class Transcript(object):
 
     def introns(self):
         return list(self.iterintrons())
+
+    # add function to return tss of transcript
+    def tss(self, left, right):
+        tss_start = self.start + left
+        tss_end = self.start + right
+        tss_start = tss_start if tss_start > 0 else 0
+        tss_end = tss_end if tss_end < self.end else self.end
+        return tss_start, tss_end
+
+    def to_feature_bed6(self, tss_left=-2200, tss_right=500):
+        bed6 = []
+        tss_start, tss_end = self.tss(tss_left, tss_right)
+
+        def add_feature_pos(start, end, feature):
+            bed_line = [
+                self.chrom,
+                str(start),
+                str(end),
+                str(self.attrs["transcript_id"]), '0',
+                strand_int_to_str(self.strand),
+                str(self.attrs["gene_id"]), feature
+            ]
+            return '\t'.join(bed_line)
+
+        bed6.append(add_feature_pos(tss_start, tss_end, 'tss'))
+        for exon in self.exons:
+            bed6.append(add_feature_pos(exon.start, exon.end, 'exon'))
+        for intron in self.iterintrons:
+            bed6.append(add_feature_pos(intron[0], intron[1], 'exon'))
+        for each_line in bed6:
+            yield each_line
 
     def to_bed12(self):
         block_sizes = []
