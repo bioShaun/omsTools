@@ -1,6 +1,7 @@
 # omsTools: A Tool Box for NGS analysis
-[![Build Status](https://travis-ci.org/bioShaun/omsTools.svg?branch=master)](https://travis-ci.org/bioShaun/omsTools)
 -----
+
+[![Build Status](https://travis-ci.org/bioShaun/omsTools.svg?branch=master)](https://travis-ci.org/bioShaun/omsTools)
 
 omsTools is a collection of scripts for NGS (mainly for RNAseq) analysis.
 
