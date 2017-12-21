@@ -13,8 +13,12 @@ def gtf_classifier(line, method):
             return 'unknown'
         else:
             tag_value = line.attrs[tag]
-            if 'type' in tag:
+            if 'biotype' in tag:
                 tag_value = gtf_tools['func_get_tr_type'](tag_value)
+                if 'transcript_biotype' in line.attrs:
+                    line.attrs['transcript_biotype'] = gtf_tools['func_get_tr_type'](line.attrs['transcript_biotype'])
+                if 'gene_biotype' in line.attrs:
+                    line.attrs['gene_biotype'] = gtf_tools['func_get_tr_type'](line.attrs['gene_biotype'])
             return tag_value
     elif method == 'chr':
         return line.chrom
