@@ -76,6 +76,7 @@ def add_type(func):
                         'Gene_biotype', []).append(gene_type)
             tr_type_df = pd.DataFrame(tr_type_dict)
             gene_type_df = tr_type_df.loc[:, ['Gene_id', 'Gene_biotype']]
+            gene_type_df = gene_type_df.drop_duplicates()
             tr_type_df = tr_type_df.drop('Gene_id', axis=1)
             gene_feature_df = pd.merge(
                 gene_feature_df, gene_type_df,
@@ -181,6 +182,9 @@ def main(gtf, out_dir, biotype):
     # write out exon/intron feature file
     exon_intron_feature_file = os.path.join(out_dir, 'Exon_Intron_feature.txt')
     exon_intron_df.to_csv(exon_intron_feature_file, sep='\t', index=False)
+    # TODO sort output table
+    # plot
+
 
 
 if __name__ == '__main__':
