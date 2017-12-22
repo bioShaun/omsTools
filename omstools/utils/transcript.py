@@ -225,6 +225,40 @@ class Transcript(object):
         return features
 
 
+def to_formatted_gtf(lines, gtf_file, attr_defs=None):
+    transcripts = collections.OrderedDict()
+    for line in lines:
+        feature = GTFFeature.from_string(line, attr_defs)
+        # skip gene annotation in gtf files
+        if "transcript_id" not in feature.attrs:
+            continue
+        t_id = feature.attrs["transcript_id"]
+        # extract exon information
+        if t_id not in transcripts:
+            if feature.feature_type == "exon":
+                t = Transcript()
+                t.chrom = feature.seqid
+                t.source = feature.source
+                t.start = feature.start
+                t.end = feature.end
+                t.strand = strand_str_to_int(feature.strand)
+                t.exons = [Exon(feature.start, feature.end)]
+                t.attrs = feature.attrs
+                for each_attr in t.attrs:
+                    if 'exon' in each_attr.lower():
+                        t.attrs.pop(each_attr)
+                transcripts[t_id] = t
+        else:
+            t.start = t.start if t.start <= feature.start else feature.start
+            t.end = t.end if t.end >= feature.end else feature.end
+            t.exons.append(Exon(feature.start, feature.end))
+    with open(gtf_file, 'w') as gtf_output:
+        for each_tr in transcripts:
+            for each_feature in each_tr.to_gtf_features():
+                gtf_output.write('{gtf_line}\n'.format(
+                    gtf_line=str(each_feature)))
+
+
 def transcripts_from_gtf_lines(lines, attr_defs=None):
     transcripts = collections.OrderedDict()
     for line in lines:
