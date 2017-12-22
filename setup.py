@@ -32,7 +32,8 @@ setup(
         'console_scripts': [
             "oms_lncRNA_classify=omstools.RNAseq.lncRNA.classify.lncRNA_classify:main",
             "oms_gtf_split=omstools.general.gtf_split:main",
-            "oms_transcript_feature=omstools.RNAseq.lncRNA.assembly.transcript_feature:main"
+            "oms_transcript_feature=omstools.RNAseq.lncRNA.assembly.transcript_feature:main",
+            "oms_gtf2bed=omstools.general.gtf2bed:main",
         ],
         'gtf': [
             "func_tr_from_gtf_lines=omstools.utils.transcript:transcripts_from_gtf_lines",

@@ -18,17 +18,17 @@ GTFError = gtf_tools['error_GTFError']
     '-b',
     '--bed',
     type=click.File('w'),
-    default='',
+    required=True,
     help='output bed file path.'
 )
 @click.option(
     '-f',
-    '--format',
+    '--bed_format',
     default='bed12',
     type=click.Choice(['bed12', 'bed6']),
     help='output bed format.'
 )
-def main(gtf, bed, format):
+def main(gtf, bed, bed_format):
     gtf_dir_prefix = os.path.splitext(gtf.name)[0]
     try:
         transcript_objs = gtf_tools['func_tr_from_gtf_lines'](gtf)
@@ -37,6 +37,17 @@ def main(gtf, bed, format):
         formated_gtf_file = '{pfx}_formatted.gtf'.format(
             pfx=gtf_dir_prefix)
         gtf_tools['func_to_formatted_gtf'](gtf, formated_gtf_file)
+        with open(formated_gtf_file) as gtf_inf:
+            transcript_objs = gtf_tools['func_tr_from_gtf_lines'](gtf_inf)
+    if bed_format == 'bed12':
+        for each_tr_obj in transcript_objs:
+            bed.write('{bedline}\n'.format(
+                bedline=each_tr_obj.to_bed12()))
+    elif bed_format == 'bed6':
+        for each_tr_obj in transcript_objs:
+            for each_line in each_tr_obj.to_feature_bed6():
+                bed.write('{bedline}\n'.format(
+                    bedline=each_line))
 
 
 if __name__ == '__main__':

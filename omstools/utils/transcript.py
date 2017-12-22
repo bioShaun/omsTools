@@ -168,17 +168,18 @@ class Transcript(object):
         bed6.append(add_feature_pos(tss_start, tss_end, 'tss'))
         for exon in self.exons:
             bed6.append(add_feature_pos(exon.start, exon.end, 'exon'))
-        for intron in self.iterintrons:
-            bed6.append(add_feature_pos(intron[0], intron[1], 'exon'))
+        for intron in self.iterintrons():
+            bed6.append(add_feature_pos(intron[0], intron[1], 'intron'))
         for each_line in bed6:
             yield each_line
 
     def to_bed12(self):
         block_sizes = []
         block_starts = []
-        for e0, e1 in self.exons:
-            block_starts.append(e0 - self.tx_start)
-            block_sizes.append(e1 - e0)
+        tr_start = self.start
+        for e in self.exons:
+            block_starts.append(e.start - tr_start)
+            block_sizes.append(e.end - e.start)
         # write
         s = '\t'.join([
             self.chrom,
@@ -238,15 +239,14 @@ def to_formatted_gtf(lines, gtf_file, attr_defs=None):
             if feature.feature_type == "exon":
                 t = Transcript()
                 t.chrom = feature.seqid
-                t.source = feature.source
                 t.start = feature.start
                 t.end = feature.end
                 t.strand = strand_str_to_int(feature.strand)
                 t.exons = [Exon(feature.start, feature.end)]
-                t.attrs = feature.attrs
-                for each_attr in t.attrs:
-                    if 'exon' in each_attr.lower():
-                        t.attrs.pop(each_attr)
+                t.attrs = dict()
+                for each_attr in feature.attrs:
+                    if 'exon' not in each_attr.lower():
+                        t.attrs.update({each_attr: feature.attrs[each_attr]})
                 transcripts[t_id] = t
         else:
             t.start = t.start if t.start <= feature.start else feature.start
@@ -254,7 +254,8 @@ def to_formatted_gtf(lines, gtf_file, attr_defs=None):
             t.exons.append(Exon(feature.start, feature.end))
     with open(gtf_file, 'w') as gtf_output:
         for each_tr in transcripts:
-            for each_feature in each_tr.to_gtf_features():
+            each_tr_obj = transcripts[each_tr]
+            for each_feature in each_tr_obj.to_gtf_features():
                 gtf_output.write('{gtf_line}\n'.format(
                     gtf_line=str(each_feature)))
 
