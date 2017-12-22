@@ -6,31 +6,17 @@ from omstools.utils.config import CLICK_CONTEXT_SETTINGS
 from omstools.utils.systools import save_mkdir
 import envoy
 
-
 script_dir, script_name = os.path.split(os.path.abspath(__file__))
 FEATURE_PLOT_R = os.path.join(script_dir, 'transcript_feature.R')
 
-
 CURRENT_DIR = os.getcwd()
 TR_HEADER = [
-    'Transcript_id',
-    'Gene_id',
-    'Chr',
-    'Start',
-    'End',
-    'Strand',
-    'Exon_number',
+    'Transcript_id', 'Gene_id', 'Chr', 'Start', 'End', 'Strand', 'Exon_number',
     'Transcript_length'
 ]
 
 EXON_HEADER = [
-    'Chr',
-    'Start',
-    'End',
-    'Strand',
-    'Feature',
-    'Transcript_id',
-    'Gene_id',
+    'Chr', 'Start', 'End', 'Strand', 'Feature', 'Transcript_id', 'Gene_id',
     'Length'
 ]
 
@@ -43,16 +29,19 @@ def get_gene_feature(tr_df):
     gene_end = tr_df.groupby(['Gene_id'])['End'].max()
     gene_strand = tr_df.groupby(['Gene_id'])['Strand'].first()
     gene_tr = tr_df.groupby(['Gene_id'])['Transcript_id'].unique()
-    gene_tr = pd.Series([','.join(each) for each in gene_tr],
-                        index=gene_tr.index)
+    gene_tr = pd.Series(
+        [','.join(each) for each in gene_tr], index=gene_tr.index)
     gene_tr.name = 'Transcripts'
     gene_tr_num = tr_df.groupby(['Gene_id'])['Transcript_id'].count()
     gene_tr_num.name = 'Transcript_number'
     gene_exon = tr_df.groupby(['Gene_id'])['Exon_number'].max()
     gene_len = tr_df.groupby(['Gene_id'])['Transcript_length'].max()
-    gene_df = pd.concat([gene_chr, gene_start, gene_end, gene_strand,
-                        gene_tr, gene_tr_num, gene_exon, gene_len],
-                        axis=1)
+    gene_df = pd.concat(
+        [
+            gene_chr, gene_start, gene_end, gene_strand, gene_tr, gene_tr_num,
+            gene_exon, gene_len
+        ],
+        axis=1)
     gene_df = gene_df.reset_index()
     return gene_df
 
@@ -60,6 +49,7 @@ def get_gene_feature(tr_df):
 def add_type(func):
     '''add transcript/gene biotype to gene/transcript feature table
     '''
+
     def wrapper(gtf, biotype=False):
         if not biotype:
             return func(gtf)
@@ -73,25 +63,42 @@ def add_type(func):
                     gene_type = each_tr.attrs["gene_biotype"]
                     tr_type_dict.setdefault('Transcript_id', []).append(tr_id)
                     tr_type_dict.setdefault('Gene_id', []).append(gene)
-                    tr_type_dict.setdefault(
-                        'Transcript_biotype', []).append(tr_type)
-                    tr_type_dict.setdefault(
-                        'Gene_biotype', []).append(gene_type)
+                    tr_type_dict.setdefault('Transcript_biotype',
+                                            []).append(tr_type)
+                    tr_type_dict.setdefault('Gene_biotype',
+                                            []).append(gene_type)
             tr_type_df = pd.DataFrame(tr_type_dict)
             gene_type_df = tr_type_df.loc[:, ['Gene_id', 'Gene_biotype']]
             gene_type_df = gene_type_df.drop_duplicates()
             tr_type_df = tr_type_df.drop('Gene_id', axis=1)
             gene_feature_df = pd.merge(
-                gene_feature_df, gene_type_df,
-                left_on='Gene_id', right_on='Gene_id', how='left')
+                gene_feature_df,
+                gene_type_df,
+                left_on='Gene_id',
+                right_on='Gene_id',
+                how='left')
             tr_feature_df = pd.merge(
-                tr_feature_df, tr_type_df,
-                left_on='Transcript_id', right_on='Transcript_id', how='left')
+                tr_feature_df,
+                tr_type_df,
+                left_on='Transcript_id',
+                right_on='Transcript_id',
+                how='left')
             exon_intron_df = pd.merge(
-                exon_intron_df, tr_type_df,
-                left_on='Transcript_id', right_on='Transcript_id', how='left')
+                exon_intron_df,
+                tr_type_df,
+                left_on='Transcript_id',
+                right_on='Transcript_id',
+                how='left')
             return gene_feature_df, tr_feature_df, exon_intron_df
+
     return wrapper
+
+
+# def sort_table(func):
+#     def wrapper(gtf):
+#         pass
+
+#     pass
 
 
 @add_type
@@ -118,8 +125,8 @@ def gtf2feature(gtf, biotype=False):
             for each_exon in each_tr.exons:
                 each_exon_len = each_exon.end - each_exon.start
                 exon_intron_dict.setdefault('Chr', []).append(each_tr.chrom)
-                exon_intron_dict.setdefault('Start', []).append(
-                    each_exon.start + 1)
+                exon_intron_dict.setdefault('Start',
+                                            []).append(each_exon.start + 1)
                 exon_intron_dict.setdefault('End', []).append(each_exon.end)
                 exon_intron_dict.setdefault('Strand', []).append(strand)
                 exon_intron_dict.setdefault('Feature', []).append('exon')
@@ -161,21 +168,31 @@ def plot_feature(out_dir):
     return err_list
 
 
+def get_summary(df, cat_col, stat_col):
+    summary_df_list = list()
+    for each_stat in stat_col:
+        each_stat_list = list()
+        df_group = df.groupby(cat_col)[each_stat]
+        for i in (.25, .5, .75):
+            each_stat_list.append(df_group.quantile(i))
+        each_stat_list.append(df_group.mean())
+        each_stat_df = pd.concat(each_stat_list, axis=1)
+        each_stat_df.loc[:, 'Stat'] = each_stat
+        each_stat_df.columns = ['Q1', 'Median', 'Q3', 'Mean', 'Stat']
+        summary_df_list.append(each_stat_df)
+    summary_df = pd.concat(summary_df_list)
+    return summary_df
+
+
 @click.command(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.option(
-    '-g',
-    '--gtf',
-    help='gtf file.',
-    required=True,
-    type=click.File('r')
-)
+    '-g', '--gtf', help='gtf file.', required=True, type=click.File('r'))
 @click.option(
     '-o',
     '--out_dir',
     help='directory to store assembly transcript/gene feature.',
     default=CURRENT_DIR,
-    type=click.Path(file_okay=False)
-)
+    type=click.Path(file_okay=False))
 @click.option(
     '--biotype',
     help='add transcript/gene biotype to feature table.',
@@ -200,7 +217,66 @@ def main(gtf, out_dir, biotype):
     # write out exon/intron feature file
     exon_intron_df.to_csv(exon_intron_feature_file, sep='\t', index=False)
     # plot output
-    plot_feature(out_dir)
+    # plot_feature(out_dir)
+    # output summary
+    if biotype:
+        gene_feature_summary = os.path.join(
+            out_dir, 'Gene_feature_summary.txt')
+        tr_feature_summary = os.path.join(
+            out_dir, 'Transcript_feature_summary.txt')
+        exon_intron_feature_summary = os.path.join(
+            out_dir, 'Exon_Intron_feature_summary.txt')
+        gene_summary_df = get_summary(
+            gene_feature_df, 'Gene_biotype',
+            ['Transcript_number', 'Exon_number', 'Transcript_length'])
+        gene_summary_df.to_csv(gene_feature_summary, sep='\t')
+
+        # def tr_feature_summary(df, , stat_col):
+        #     df.loc[:, 'Transcript_biotype_general'] = map(
+        #         gtf_tools['func_get_tr_type'],
+        #         tr_feature_df.loc[:, 'Transcript_biotype'])
+        #     summary_df1 = get_summary(
+        #         tr_feature_df, 'Transcript_biotype',
+        #         stat_col)
+        #     summary_df2 = get_summary(
+        #         tr_feature_df, 'Transcript_biotype_general',
+        #         stat_col)
+        #     summary_df = pd.concat([summary_df1, summary_df2])
+        #     summary_df = summary_df.drop_duplicates()
+
+        tr_feature_df.loc[:, 'Transcript_biotype_general'] = map(
+            gtf_tools['func_get_tr_type'],
+            tr_feature_df.loc[:, 'Transcript_biotype'])
+        tr_summary_df1 = get_summary(
+            tr_feature_df, 'Transcript_biotype',
+            ['Exon_number', 'Transcript_length'])
+        tr_summary_df2 = get_summary(
+            tr_feature_df, 'Transcript_biotype_general',
+            ['Exon_number', 'Transcript_length'])
+        tr_summary_df = pd.concat([tr_summary_df1, tr_summary_df2])
+        tr_summary_df = tr_summary_df.drop_duplicates()
+        tr_summary_df.index.name = 'Transcript_biotype'
+        tr_summary_df = tr_summary_df.reset_index()
+        tr_summary_df = tr_summary_df.sort_values(
+            by=['Stat', 'Transcript_biotype'])
+        tr_summary_df.to_csv(tr_feature_summary, sep='\t', index=False)
+        ei_id_tuple = zip(exon_intron_df.Chr, exon_intron_df.Start.map(str),
+                          exon_intron_df.End.map(str), exon_intron_df.Strand,
+                          exon_intron_df.Transcript_biotype)
+        ei_id_list = ['_'.join(each) for each in ei_id_tuple]
+        exon_intron_df.loc[:, 'exon_id'] = ei_id_list
+        exon_intron_df.loc[:, 'Transcript_biotype_general'] = map(
+            gtf_tools['func_get_tr_type'],
+            exon_intron_df.loc[:, 'Transcript_biotype'])
+        ei_summary_df1 = get_summary(
+            exon_intron_df,
+            ['Transcript_biotype', 'Feature'], ['Length'])
+        ei_summary_df2 = get_summary(
+            exon_intron_df,
+            ['Transcript_biotype_general', 'Feature'], ['Length'])
+        ei_summary_df = pd.concat([ei_summary_df1, ei_summary_df2])
+        ei_summary_df = ei_summary_df.drop_duplicates().sort_index()
+        ei_summary_df.to_csv(exon_intron_feature_summary, sep='\t')
     # TODO sort output table
 
 
