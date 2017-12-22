@@ -29,6 +29,8 @@ GTFError = gtf_tools['error_GTFError']
     help='output bed format.'
 )
 def main(gtf, bed, bed_format):
+    '''Convert gtf to bed12 and bed6(including tss, exon and intron feature)
+    '''
     gtf_dir_prefix = os.path.splitext(gtf.name)[0]
     try:
         transcript_objs = gtf_tools['func_tr_from_gtf_lines'](gtf)

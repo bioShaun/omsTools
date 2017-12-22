@@ -14,6 +14,7 @@ Name | Function |
 oms_lncRNA_classify |Classify lncRNA according to its relative location to mRNA|
 oms_gtf_split| Split gtf file according to its field or attribute|
 oms_transcript_feature|Extract basic information of gene/transcript/exon/intron from gtf file|
+oms_gtf2bed|Convert gtf to bed12 and bed6(including tss, exon and intron feature)|
 
 ## Installation
 
@@ -57,3 +58,6 @@ After installation, run `omstools` to find out all the available tools and their
 name_of_script -h
 ```
  
+## Acknowledgement
+
+- gtf and transcript module are from AssemblyLine by mkiyer
