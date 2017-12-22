@@ -12,3 +12,4 @@ script:
   - oms_gtf_split -h
   - oms_lncRNA_classify -h
   - oms_transcript_feature -h
+  - oms_gtf2bed -h
