@@ -4,6 +4,11 @@ import pandas as pd
 from omstools.utils.config import gtf_tools
 from omstools.utils.config import CLICK_CONTEXT_SETTINGS
 from omstools.utils.systools import save_mkdir
+import envoy
+
+
+script_dir, script_name = os.path.split(os.path.abspath(__file__))
+FEATURE_PLOT_R = os.path.join(script_dir, 'transcript_feature.R')
 
 
 CURRENT_DIR = os.getcwd()
@@ -31,8 +36,7 @@ EXON_HEADER = [
 
 
 def get_gene_feature(tr_df):
-    '''
-    summarize gene feature according to transcript feature table
+    '''summarize gene feature according to transcript feature table
     '''
     gene_chr = tr_df.groupby(['Gene_id'])['Chr'].first()
     gene_start = tr_df.groupby(['Gene_id'])['Start'].min()
@@ -54,8 +58,7 @@ def get_gene_feature(tr_df):
 
 
 def add_type(func):
-    '''
-    add transcript/gene biotype to gene/transcript feature table
+    '''add transcript/gene biotype to gene/transcript feature table
     '''
     def wrapper(gtf, biotype=False):
         if not biotype:
@@ -93,8 +96,7 @@ def add_type(func):
 
 @add_type
 def gtf2feature(gtf, biotype=False):
-    '''
-    extract transcript/exon/intron basic information from gtf
+    '''extract transcript/exon/intron basic information from gtf
     and store it to DataFrame
     '''
     tr_feature_dict = dict()
@@ -145,6 +147,20 @@ def gtf2feature(gtf, biotype=False):
     return gene_feature_df, tr_feature_df, exon_intron_df
 
 
+def plot_feature(out_dir):
+    '''generate feature plot in output directory
+    '''
+    cmd1 = 'Rscript {rs} --feature_file_dir {dr} --out_dir {dr}'.format(
+        rs=FEATURE_PLOT_R, dr=out_dir)
+    cmd2 = '{cmd} --detail'.format(cmd=cmd1)
+    cmd_list = [cmd1, cmd2]
+    err_list = []
+    for each_cmd in cmd_list:
+        r = envoy.run(each_cmd)
+        err_list.append(r.std_err)
+    return err_list
+
+
 @click.command(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.option(
     '-g',
@@ -171,20 +187,21 @@ def main(gtf, out_dir, biotype):
     # insure out_dir exists
     save_mkdir(out_dir)
     # extract feature information from gtf file
+    gene_featrue_file = os.path.join(out_dir, 'Gene_feature.txt')
+    tr_feature_file = os.path.join(out_dir, 'Transcript_feature.txt')
+    exon_intron_feature_file = os.path.join(out_dir, 'Exon_Intron_feature.txt')
     gene_feature_df, tr_feature_df, exon_intron_df = gtf2feature(
         gtf, biotype=biotype)
+
     # write out gene feature file
-    gene_featrue_file = os.path.join(out_dir, 'Gene_feature.txt')
     gene_feature_df.to_csv(gene_featrue_file, sep='\t', index=False)
     # write out transcript feature file
-    tr_feature_file = os.path.join(out_dir, 'Transcript_feature.txt')
     tr_feature_df.to_csv(tr_feature_file, sep='\t', index=False)
     # write out exon/intron feature file
-    exon_intron_feature_file = os.path.join(out_dir, 'Exon_Intron_feature.txt')
     exon_intron_df.to_csv(exon_intron_feature_file, sep='\t', index=False)
+    # plot output
+    plot_feature(out_dir)
     # TODO sort output table
-    # plot
-
 
 
 if __name__ == '__main__':
