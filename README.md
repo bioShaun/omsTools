@@ -60,4 +60,4 @@ name_of_script -h
  
 ## Acknowledgement
 
-- Two import modules in this project gtf and transcript are from AssemblyLine by mkiyer
+- Import modules in this project gtf and transcript are from AssemblyLine by mkiyer
