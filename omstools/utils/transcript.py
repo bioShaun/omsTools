@@ -173,6 +173,51 @@ class Transcript(object):
         for each_line in bed6:
             yield each_line
 
+    def to_splicing_region(self):
+        '''get 45bp exonic and intronic regions surrounding the splice site.
+        45bp are positioned 5bp away from the precise splice site position to
+        accommodate for potential imprecise splice site annotation
+        '''
+        splicing_list = list()
+
+        def add_feature_pos(start, end, feature):
+            bed_line = [
+                self.chrom,
+                str(start),
+                str(end),
+                str(self.attrs["transcript_id"]), '0',
+                strand_int_to_str(self.strand),
+                str(self.attrs["gene_id"]), feature
+            ]
+            return '\t'.join(bed_line)
+
+        for n, intron in enumerate(self.iterintrons()):
+            exon_s1_start, exon_s1_end = intron[0] - 45, intron[0] + 5
+            exon_s2_start, exon_s2_end = intron[1] - 5, intron[0] + 55
+            intron_s1_start, intron_s1_end = intron[0] - 5, intron[0] + 45
+            intron_s2_start, intron_s2_end = intron[1] - 45, intron[1] + 5
+            splicing_list.append(
+                add_feature_pos(
+                    exon_s1_start, exon_s1_end, 's{n}-exon'.format(n=2 * n)))
+            splicing_list.append(
+                add_feature_pos(
+                    exon_s2_start,
+                    exon_s2_end,
+                    's{n}-exon'.format(n=2 * n + 1)))
+            splicing_list.append(
+                add_feature_pos(
+                    intron_s1_start,
+                    intron_s1_end,
+                    's{n}-intron'.format(n=2 * n)))
+            splicing_list.append(
+                add_feature_pos(
+                    intron_s2_start,
+                    intron_s2_end,
+                    's{n}-intron'.format(n=2 * n + 1)))
+
+        for eachline in splicing_list:
+            yield eachline
+
     def to_bed12(self):
         block_sizes = []
         block_starts = []
@@ -256,8 +301,8 @@ def to_formatted_gtf(lines, gtf_file, attr_defs=None):
         for each_tr in transcripts:
             each_tr_obj = transcripts[each_tr]
             for each_feature in each_tr_obj.to_gtf_features():
-                gtf_output.write('{gtf_line}\n'.format(
-                    gtf_line=str(each_feature)))
+                gtf_output.write(
+                    '{gtf_line}\n'.format(gtf_line=str(each_feature)))
 
 
 def transcripts_from_gtf_lines(lines, attr_defs=None):
