@@ -25,11 +25,12 @@ GTFError = gtf_tools['error_GTFError']
     '-f',
     '--bed_format',
     default='bed12',
-    type=click.Choice(['bed12', 'bed6', 'splicing']),
+    type=click.Choice(['bed12', 'bed6', 'splicing', 'donor']),
     help='output bed format.'
 )
 def main(gtf, bed, bed_format):
-    '''Convert gtf to bed12 and bed6(including tss, exon and intron feature)
+    '''Convert gtf to bed12, bed6(including tss, exon and intron feature),
+    splicing site and donor/acceptor site.
     '''
     gtf_dir_prefix = os.path.splitext(gtf.name)[0]
     try:
@@ -53,6 +54,11 @@ def main(gtf, bed, bed_format):
     elif bed_format == 'splicing':
         for each_tr_obj in transcript_objs:
             for eachline in each_tr_obj.to_splicing_region():
+                bed.write('{bedline}\n'.format(
+                    bedline=eachline))
+    elif bed_format == 'donor':
+        for each_tr_obj in transcript_objs:
+            for eachline in each_tr_obj.to_donor_acceptor():
                 bed.write('{bedline}\n'.format(
                     bedline=eachline))
 

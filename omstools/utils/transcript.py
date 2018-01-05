@@ -132,6 +132,17 @@ class Transcript(object):
     def length(self):
         return sum((e.end - e.start) for e in self.exons)
 
+    def add_feature_pos(self, start, end, feature):
+        bed_line = [
+            self.chrom,
+            str(start),
+            str(end),
+            str(self.attrs["transcript_id"]), '0',
+            strand_int_to_str(self.strand),
+            str(self.attrs["gene_id"]), feature
+        ]
+        return '\t'.join(bed_line)
+
     def iterintrons(self):
         e1 = self.exons[0]
         for j in xrange(1, len(self.exons)):
@@ -144,73 +155,84 @@ class Transcript(object):
 
     # add function to return tss of transcript
     def tss(self, left, right):
-        tss_start = self.start + left
-        tss_end = self.start + right
-        tss_start = tss_start if tss_start > 0 else 0
-        tss_end = tss_end if tss_end < self.end else self.end
+        '''get tss interval for transcript
+        '''
+        if self.strand == 0:
+            tss_start = self.start + left
+            tss_end = self.start + right
+            tss_start = tss_start if tss_start > 0 else 0
+            tss_end = tss_end if tss_end < self.end else self.end
+        else:
+            tss_start = self.end - left
+            tss_end = self.end - right
+            tss_end = tss_end if tss_end > self.start else self.start
         return tss_start, tss_end
 
     def to_feature_bed6(self, tss_left=-2200, tss_right=500):
+        '''generate bed file for exon, intron and tss
+        '''
         bed6 = []
         tss_start, tss_end = self.tss(tss_left, tss_right)
 
-        def add_feature_pos(start, end, feature):
-            bed_line = [
-                self.chrom,
-                str(start),
-                str(end),
-                str(self.attrs["transcript_id"]), '0',
-                strand_int_to_str(self.strand),
-                str(self.attrs["gene_id"]), feature
-            ]
-            return '\t'.join(bed_line)
-
-        bed6.append(add_feature_pos(tss_start, tss_end, 'tss'))
+        bed6.append(self.add_feature_pos(tss_start, tss_end, 'tss'))
         for exon in self.exons:
-            bed6.append(add_feature_pos(exon.start, exon.end, 'exon'))
+            bed6.append(self.add_feature_pos(exon.start, exon.end, 'exon'))
         for intron in self.iterintrons():
-            bed6.append(add_feature_pos(intron[0], intron[1], 'intron'))
+            bed6.append(self.add_feature_pos(intron[0], intron[1], 'intron'))
         for each_line in bed6:
             yield each_line
+
+    def to_donor_acceptor(self):
+        '''get donor and acceptor bed file.
+        '''
+        donor_acceptor_list = list()
+        for n, intron in enumerate(self.iterintrons()):
+            if self.strand == 2:
+                continue
+            elif self.strand == 0:
+                donor = (intron[0] - 5, intron[0] + 5)
+                acceptor = (intron[1] - 15, intron[1] + 5)
+            else:
+                donor = (intron[1] - 5, intron[1] + 5)
+                acceptor = (intron[0] - 5, intron[0] + 15)
+
+            donor_acceptor_list.append(
+                self.add_feature_pos(donor[0], donor[1], 'donor'))
+            donor_acceptor_list.append(
+                self.add_feature_pos(acceptor[0], acceptor[1], 'acceptor'))
+
+        for eachline in donor_acceptor_list:
+            yield eachline
 
     def to_splicing_region(self):
         '''get 45bp exonic and intronic regions surrounding the splice site.
         45bp are positioned 5bp away from the precise splice site position to
-        accommodate for potential imprecise splice site annotation
+        accommodate for potential imprecise splice site annotation.
         '''
         splicing_list = list()
 
-        def add_feature_pos(start, end, feature):
-            bed_line = [
-                self.chrom,
-                str(start),
-                str(end),
-                str(self.attrs["transcript_id"]), '0',
-                strand_int_to_str(self.strand),
-                str(self.attrs["gene_id"]), feature
-            ]
-            return '\t'.join(bed_line)
-
         for n, intron in enumerate(self.iterintrons()):
             exon_s1_start, exon_s1_end = intron[0] - 45, intron[0] + 5
-            exon_s2_start, exon_s2_end = intron[1] - 5, intron[0] + 55
+            exon_s2_start, exon_s2_end = intron[1] - 5, intron[1] + 45
             intron_s1_start, intron_s1_end = intron[0] - 5, intron[0] + 45
             intron_s2_start, intron_s2_end = intron[1] - 45, intron[1] + 5
             splicing_list.append(
-                add_feature_pos(
-                    exon_s1_start, exon_s1_end, 's{n}-exon'.format(n=2 * n)))
+                self.add_feature_pos(
+                    exon_s1_start,
+                    exon_s1_end,
+                    's{n}-exon'.format(n=2 * n)))
             splicing_list.append(
-                add_feature_pos(
+                self.add_feature_pos(
                     exon_s2_start,
                     exon_s2_end,
                     's{n}-exon'.format(n=2 * n + 1)))
             splicing_list.append(
-                add_feature_pos(
+                self.add_feature_pos(
                     intron_s1_start,
                     intron_s1_end,
                     's{n}-intron'.format(n=2 * n)))
             splicing_list.append(
-                add_feature_pos(
+                self.add_feature_pos(
                     intron_s2_start,
                     intron_s2_end,
                     's{n}-intron'.format(n=2 * n + 1)))
