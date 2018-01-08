@@ -25,7 +25,8 @@ setup(
         'HTSeq',
         'click',
         'distribute',
-        'tabulate'
+        'tabulate',
+        'biopython'
     ],
     scripts=['scripts/omstools'],
     entry_points={
