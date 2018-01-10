@@ -109,6 +109,8 @@ class LINUXJOB(object):
     required=True,
 )
 def main(job_name):
+    '''Kill job by job name in linux
+    '''
     my_jobs = LINUXJOB(job_name)
     my_jobs.kill_job()
 
