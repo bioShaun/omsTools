@@ -22,6 +22,7 @@ def add_content(fp, *args):
         for eachline in args:
             file_inf.write('{line}\n'.format(line=eachline))
 
+
 def save_make_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
