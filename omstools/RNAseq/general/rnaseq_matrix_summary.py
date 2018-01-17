@@ -11,7 +11,7 @@ def get_rna_matrix_inf(m_file):
                 flag = 1
                 continue
             if flag:
-                eachline_inf = eachline.strip().split()
+                eachline_inf = eachline.strip().split('\t')
                 return eachline_inf
 
 
