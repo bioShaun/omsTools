@@ -40,7 +40,7 @@ def add_percent(num):
 
 @click.command()
 @click.option('-s', '--sample_inf', type=click.Path(exists=True),
-              help='sample information, first column is sample id.',
+              help='sample information, second column is sample id.',
               required=True,)
 @click.option('-d', '--mapping_dir', type=click.Path(exists=True),
               help='mapping directory.', required=True)
