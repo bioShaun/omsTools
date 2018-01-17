@@ -164,6 +164,7 @@ def plot_feature(out_dir):
     err_list = []
     for each_cmd in cmd_list:
         r = envoy.run(each_cmd)
+        print r.std_err
         err_list.append(r.std_err)
     return err_list
 
@@ -217,7 +218,7 @@ def main(gtf, out_dir, biotype):
     # write out exon/intron feature file
     exon_intron_df.to_csv(exon_intron_feature_file, sep='\t', index=False)
     # plot output
-    # plot_feature(out_dir)
+    plot_feature(out_dir)
     # output summary
     if biotype:
         gene_feature_summary = os.path.join(

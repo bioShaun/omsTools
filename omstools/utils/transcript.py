@@ -163,8 +163,8 @@ class Transcript(object):
             tss_start = tss_start if tss_start > 0 else 0
             tss_end = tss_end if tss_end < self.end else self.end
         else:
-            tss_start = self.end - left
-            tss_end = self.end - right
+            tss_end = self.end - left
+            tss_start = self.end - right
             tss_end = tss_end if tss_end > self.start else self.start
         return tss_start, tss_end
 
