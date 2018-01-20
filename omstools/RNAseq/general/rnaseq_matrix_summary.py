@@ -25,7 +25,8 @@ OUT_HEADER = ['Aligned_bases',
 @click.command()
 @click.option('-d', '--analysis_dir', type=click.Path(exists=True),
               help='rnaseq matrix output directory.', required=True)
-@click.option('-s', '--sample_inf', type=click.Path(exists=True),
+@click.option('-s', '--sample_inf',
+              type=click.Path(exists=True, dir_okay=False),
               help='sample information, first column is sample id.',
               required=True)
 @click.option('-m', '--mapping_method', type=click.Choice(['star', 'hisat2']),

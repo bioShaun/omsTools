@@ -21,5 +21,6 @@ for n, each_sample in enumerate(sample_list):
         for eachline in each_sample_mapping_file_info:
             if 'overall alignment rate' in eachline:
                 mapping_rate = re.search(r'(.*)%', eachline).groups()[0]
+                mapping_rate = float(mapping_rate) / 100
                 summary_info.write('%s\t%s\n' % (each_sample, mapping_rate))
 summary_info.close()
