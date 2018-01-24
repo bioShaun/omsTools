@@ -56,6 +56,7 @@ def main(qc_dir, names, output):
             each_file_dir = os.path.basename(os.path.dirname(each_file))
             print each_file_dir
             sample_name = get_sample_name(each_file_dir, sample_names)
+        print each_file_path
         each_qc = fastqc.parse(each_file_path)
         reads_num = each_qc['Basic Statistics']['contents']['Total Sequences']
         reads_len = max([each['Length'] for each in
