@@ -4,6 +4,7 @@ import re
 import os
 import pandas as pd
 import glob
+import sys
 
 
 def get_sample_name(filename, names):
@@ -54,15 +55,19 @@ def main(qc_dir, names, output):
         else:
             each_file_path = each_file
             each_file_dir = os.path.basename(os.path.dirname(each_file))
-            print each_file_dir
             sample_name = get_sample_name(each_file_dir, sample_names)
-        print each_file_path
         each_qc = fastqc.parse(each_file_path)
         reads_num = each_qc['Basic Statistics']['contents']['Total Sequences']
-        reads_len = max([each['Length'] for each in
-                         each_qc['Sequence Length Distribution']['contents']])
+        max_reads_len = max([int(each['Length'].split('-')[0]) for each in
+                             each_qc['Sequence Length Distribution']['contents']])
+        min_reads_len = min([int(each['Length'].split('-')[0]) for each in
+                             each_qc['Sequence Length Distribution']['contents']])
+        if min_reads_len == max_reads_len:
+            reads_len = min_reads_len
+        else:
+            reads_len = '{mi}-{mx}'.format(mi=min_reads_len, mx=max_reads_len)
         gc_reads = each_qc['Basic Statistics']['contents']['%GC'] * reads_num
-        base_num = sum([each['Count'] * each['Length']
+        base_num = sum([each['Count'] * int(each['Length'].split('-')[0])
                         for each in
                         each_qc['Sequence Length Distribution']['contents']])
         q20_reads = sum([each['Count'] for each in
