@@ -1,3 +1,4 @@
+
 import click
 from crimson import fastqc
 import re
@@ -58,16 +59,16 @@ def main(qc_dir, names, output):
             sample_name = get_sample_name(each_file_dir, sample_names)
         each_qc = fastqc.parse(each_file_path)
         reads_num = each_qc['Basic Statistics']['contents']['Total Sequences']
-        max_reads_len = max([int(each['Length'].split('-')[0]) for each in
+        max_reads_len = max([int(str(each['Length']).split('-')[0]) for each in
                              each_qc['Sequence Length Distribution']['contents']])
-        min_reads_len = min([int(each['Length'].split('-')[0]) for each in
+        min_reads_len = min([int(str(each['Length']).split('-')[0]) for each in
                              each_qc['Sequence Length Distribution']['contents']])
         if min_reads_len == max_reads_len:
             reads_len = min_reads_len
         else:
             reads_len = '{mi}-{mx}'.format(mi=min_reads_len, mx=max_reads_len)
         gc_reads = each_qc['Basic Statistics']['contents']['%GC'] * reads_num
-        base_num = sum([each['Count'] * int(each['Length'].split('-')[0])
+        base_num = sum([each['Count'] * int(str(each['Length']).split('-')[0])
                         for each in
                         each_qc['Sequence Length Distribution']['contents']])
         q20_reads = sum([each['Count'] for each in
@@ -95,9 +96,9 @@ def main(qc_dir, names, output):
     sqc_df.loc[:, 'GC(%)'] = sqc_df.loc[:, 'gc'] / \
         sqc_df.loc[:, 'Reads_number']
     sqc_df.loc[:, 'Q20(%)'] = sqc_df.loc[:, 'q20_reads'] / \
-        sqc_df.loc[:, 'Reads_number']
+        sqc_df.loc[:, 'Reads_number'] * 100
     sqc_df.loc[:, 'Q30(%)'] = sqc_df.loc[:, 'q30_reads'] / \
-        sqc_df.loc[:, 'Reads_number']
+        sqc_df.loc[:, 'Reads_number'] * 100
     sqc_df.loc[:, 'Duplication(%)'] = sqc_df.loc[:, 'dup_reads'] / \
         sqc_df.loc[:, 'Reads_number']
     sqc_df.loc[:, 'Reads_number(M)'] = sqc_df.loc[:, 'Reads_number'] / \
@@ -109,7 +110,7 @@ def main(qc_dir, names, output):
     out_col = ['Reads_number(M)', 'Reads_length(bp)', 'Data_size(G)',
                'GC(%)', 'Q20(%)', 'Q30(%)', 'Duplication(%)']
     out_qc_df = sqc_df.loc[:, out_col]
-    out_qc_df.to_csv(output, sep='\t', float_format='%.3f')
+    out_qc_df.to_csv(output, sep='\t', float_format='%.2f')
 
 
 if __name__ == '__main__':
