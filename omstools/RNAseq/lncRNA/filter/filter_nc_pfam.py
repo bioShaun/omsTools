@@ -24,10 +24,12 @@ from scipy import stats
     required=True,
     help='valid Pfam domains in transcribed regions')
 def main(coding_pfam, noncoding_pfam, pfam_hit):
-    cd_df = pd.read_csv(coding_pfam, header=None, delim_whitespace=True)
+    cd_df = pd.read_csv(coding_pfam, header=None, delim_whitespace=True,
+                        skip_blank_lines=True, comment="#")
     cd_total = len(cd_df)
     cd_count = Counter(cd_df.loc[:, 5])
-    nc_df = pd.read_csv(noncoding_pfam, header=None, delim_whitespace=True)
+    nc_df = pd.read_csv(noncoding_pfam, header=None, delim_whitespace=True,
+                        skip_blank_lines=True, comment="#")
     nc_total = len(nc_df)
     nc_count = Counter(nc_df.loc[:, 5])
     for each_hit in cd_count:

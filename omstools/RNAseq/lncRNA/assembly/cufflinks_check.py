@@ -6,10 +6,16 @@ import os
 
 def read_cufflinks_log(log_file):
     log_inf = open(log_file).readlines()
+    flag = 0
     for n, eachline in enumerate(log_inf):
+        if 'Loading reference annotation' in eachline:
+            flag = 0
+            continue
         if 'Assembling transcripts and estimating abundances' in eachline:
-            if (log_inf[n + 1]).strip()[-4:] == '100%':
-                return True
+            flag = 1
+            continue
+        if flag == 0 and eachline.strip()[-4:] == '100%':
+            return True
     return False
 
 

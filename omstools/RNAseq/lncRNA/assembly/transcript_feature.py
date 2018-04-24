@@ -21,6 +21,35 @@ EXON_HEADER = [
 ]
 
 
+def is_formatted(gtf):
+    '''check if gtf file is formated
+    '''
+    gtf_obj = gtf_tools['func_parse_gtf'](gtf)
+    try:
+        gtf_obj.next()
+    except gtf_tools['error_GTFError']:
+        flag = False
+    else:
+        flag = True
+    finally:
+        gtf.seek(0)
+        return flag
+
+
+def format_gtf(gtf):
+    '''format gtf file to assembly line accepted format
+    '''
+    if is_formatted(gtf):
+        return gtf
+    else:
+        gtf_path, gtf_name = os.path.split(gtf.name)
+        formated_gtf = os.path.join(
+            gtf_path, 'formated.{n}'.format(n=gtf_name))
+        gtf_tools['func_to_formatted_gtf'](gtf, formated_gtf)
+        gtf_inf = open(formated_gtf, 'r')
+        return gtf_inf
+
+
 def get_gene_feature(tr_df):
     '''summarize gene feature according to transcript feature table
     '''
@@ -100,7 +129,6 @@ def add_type(func):
 
 #     pass
 
-
 @add_type
 def gtf2feature(gtf, biotype=False):
     '''extract transcript/exon/intron basic information from gtf
@@ -108,7 +136,8 @@ def gtf2feature(gtf, biotype=False):
     '''
     tr_feature_dict = dict()
     exon_intron_dict = dict()
-    for gene, tr_objs in gtf_tools['func_parse_gtf'](gtf):
+    gtf_obj_iter = gtf_tools['func_parse_gtf'](gtf)
+    for gene, tr_objs in gtf_obj_iter:
         for each_tr in tr_objs:
             tr_id = each_tr.attrs["transcript_id"]
             exon_num = len(each_tr.exons)
@@ -187,7 +216,11 @@ def get_summary(df, cat_col, stat_col):
 
 @click.command(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.option(
-    '-g', '--gtf', help='gtf file.', required=True, type=click.File('r'))
+    '-g',
+    '--gtf',
+    help='gtf file.',
+    required=True,
+    type=click.File('r'))
 @click.option(
     '-o',
     '--out_dir',
@@ -208,6 +241,7 @@ def main(gtf, out_dir, biotype):
     gene_featrue_file = os.path.join(out_dir, 'Gene_feature.txt')
     tr_feature_file = os.path.join(out_dir, 'Transcript_feature.txt')
     exon_intron_feature_file = os.path.join(out_dir, 'Exon_Intron_feature.txt')
+    gtf = format_gtf(gtf)
     gene_feature_df, tr_feature_df, exon_intron_df = gtf2feature(
         gtf, biotype=biotype)
 

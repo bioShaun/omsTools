@@ -38,24 +38,28 @@ tr_feature <- read.delim(tr_feature_file)
 gene_feautre <- read.delim(gene_feature_file)
 exon_intron_feature <- fread(exon_intron_file)
 
+tr_feature$Transcript_biotype[tr_feature$Transcript_biotype == 'protein_coding'] <- 'Protein coding'
+gene_feautre$Gene_biotype[gene_feautre$Gene_biotype == 'protein_coding'] <- 'Protein coding'
+exon_intron_feature$Transcript_biotype[exon_intron_feature$Transcript_biotype == 'protein_coding'] <- 'Protein coding'
+
 set1_left <- c(brewer.pal(9, "Set1")[2:4], brewer.pal(9, "Set1")[6:9])
 mypal <- colorRampPalette(set1_left)
-colors <- c("#A50026", "orange")
-plot_order <- c('protein_coding', 'TUCP')
+colors <- c("#E3A635", "#34398C")
+plot_order <- c('TUCP', "Protein coding")
 
 tr_len_name = 'Processed_Transcript_Size_Distribution'
 if ( ! argv$detail ) {
   tr_feature_plot <- mutate(tr_feature, 
                        Transcript_biotype = ifelse(
-                         Transcript_biotype %in% c('protein_coding', 'TUCP'),
+                         Transcript_biotype %in% c('Protein coding', 'TUCP'),
                          Transcript_biotype,"lncRNA"))
   exon_intron_feature_plot <- mutate(exon_intron_feature, 
                                      Transcript_biotype = ifelse(
-                                       Transcript_biotype %in% c('protein_coding', 'TUCP'),
+                                       Transcript_biotype %in% c('Protein coding', 'TUCP'),
                                        Transcript_biotype, "lncRNA"))
   
-  plot_order <- c(plot_order, 'lncRNA')
-  colors <- c(colors, "#313695")
+  plot_order <- c('lncRNA', plot_order)
+  colors <- c('#CA272B', colors)
   names(colors) <- plot_order
   plot_width = 8
   plot_height = 8
@@ -63,7 +67,7 @@ if ( ! argv$detail ) {
 } else {
   tr_feature_plot <- tr_feature
   exon_intron_feature_plot <- exon_intron_feature
-  lnc_df <- filter(tr_feature, ! Transcript_biotype %in% c('protein_coding', 'TUCP'))
+  lnc_df <- filter(tr_feature, ! Transcript_biotype %in% c('Protein coding', 'TUCP'))
   lnc_type <- sort(unique(lnc_df$Transcript_biotype))
   plot_order <- c(plot_order, lnc_type)
   colors <- c(colors, mypal(length(lnc_type)))
