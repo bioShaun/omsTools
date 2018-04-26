@@ -1,10 +1,14 @@
 from __future__ import print_function
 import click
 import os
+import envoy
 
 
 CPU = 4
 BASH_HEADER = '#!/bin/bash'
+SPLIT_FA_NUM = 50000
+
+split_fa_script = '/public/scripts/omsTools/omstools/general/fa_split.py'
 
 
 def slurm_launch(script, cpu):
@@ -29,11 +33,23 @@ def save_make_dir(path):
 
 
 @click.command()
-@click.argument('split_dir')
-@click.argument('pfam_dir')
-def main(split_dir, pfam_dir):
-    split_dir = os.path.abspath(split_dir)
-    pfam_dir = os.path.abspath(pfam_dir)
+@click.argument(
+    'fasta',
+    type=click.Path(dir_okay=False, exists=True),
+    required=True)
+# @click.argument(
+#     'pfam_dir',
+#     type=click.Path(exists=False),
+#     required=True)
+def main(fasta):
+    fasta_dir, fasta_name = os.path.split(fasta)
+    split_dir = os.path.join(fasta_dir, '{n}.split'.format(n=fasta_name))
+    split_fa_cmd = 'python {s} {fa} {num} {s_dir}'.format(
+        s=split_fa_script, fa=fasta,
+        num=SPLIT_FA_NUM, s_dir=split_dir
+    )
+    envoy.run(split_fa_cmd)
+    pfam_dir = os.path.join(fasta_dir, '{n}.pfam'.format(n=fasta_name))
     script_dir = os.path.join(split_dir, 'script')
     map(save_make_dir, [script_dir, pfam_dir])
     split_files = os.listdir(split_dir)
