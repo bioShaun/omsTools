@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import subprocess
 import shutil
+import sys
 
 GTF_EMPTY_FIELD = '.'
 GTF_ATTR_SEP = ';'
@@ -42,9 +43,9 @@ GENCODE_CATEGORY_MAP = {
     'TEC': 'protein_coding',
     'nonsense_mediated_decay': 'protein_coding',
     'non_stop_decay': 'protein_coding',
-    'retained_intron': 'protein_coding',
+    'retained_intron': 'lncRNA',
     'protein_coding': 'protein_coding',
-    'ambiguous_orf': 'protein_coding',
+    'ambiguous_orf': 'lncRNA',
     'Mt_rRNA': 'ncRNA',
     'Mt_tRNA': 'ncRNA',
     'miRNA': 'ncRNA',
@@ -56,9 +57,10 @@ GENCODE_CATEGORY_MAP = {
     'sRNA': 'ncRNA',
     'scaRNA': 'ncRNA',
     'scRNA': 'ncRNA',
-    'non_coding': 'ncRNA',
+    'non_coding': 'lncRNA',
     'known_ncrna': 'ncRNA',
-    '3prime_overlapping_ncrna': 'ncRNA',
+    '3prime_overlapping_ncrna': 'lncRNA',
+    '3prime_overlapping_ncRNA': 'lncRNA',
     'vaultRNA': 'ncRNA',
     'processed_transcript': 'lncRNA',
     'lincRNA': 'lncRNA',
@@ -69,6 +71,7 @@ GENCODE_CATEGORY_MAP = {
     'antisense_RNA': 'lncRNA',
     'bidirectional_promoter_lncRNA': 'lncRNA',
     'IG_pseudogene': 'pseudogene',
+    'IG_D_pseudogene': 'pseudogene',
     'IG_C_pseudogene': 'pseudogene',
     'IG_J_pseudogene': 'pseudogene',
     'IG_V_pseudogene': 'pseudogene',
