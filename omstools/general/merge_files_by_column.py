@@ -80,7 +80,7 @@ def main(file_and_columns, output, noheader, na_rep):
         merged_df = merge_files(df_list)
         header = not noheader
         merged_df.to_csv(output, sep='\t', header=header,
-                         na_rep=na_rep)
+                         na_rep=na_rep, float_format='%.3f')
 
 
 if __name__ == '__main__':
