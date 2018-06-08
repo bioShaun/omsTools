@@ -48,6 +48,7 @@ setup(
             "func_merge_sort_gtf_files=omstools.utils.gtf:merge_sort_gtf_files",
             "class_GTFFeature=omstools.utils.gtf:GTFFeature",
             "error_GTFError=omstools.utils.gtf:GTFError",
+            "dict_GENCODE_CATEGORY_MAP=omstools.utils.gtf:GENCODE_CATEGORY_MAP"
         ]
     }
 
