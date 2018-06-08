@@ -9,6 +9,7 @@ p <- add_argument(p, "--out_prefix", help = "output prefix")
 argv <- parse_args(p)
 
 exp <- read.delim(argv$exp_file)
+colnames(exp) <- c('gene', 'tpm', 'type')
 
 theme_onmath <- function(base_size = 14) {
   theme_bw() + theme(panel.background = element_blank(), 
