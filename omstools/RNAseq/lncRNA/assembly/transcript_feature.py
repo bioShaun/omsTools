@@ -247,6 +247,10 @@ def main(gtf, out_dir, biotype):
 
     # write out gene feature file
     gene_feature_df.to_csv(gene_featrue_file, sep='\t', index=False)
+
+    # filter tr_feature_df lncRNA in protein coding gene
+    tr_feature_df = tr_feature_df[~((tr_feature_df.Gene_biotype == "protein_coding") &
+                                    (tr_feature_df.Transcript_biotype != "protein_coding"))]
     # write out transcript feature file
     tr_feature_df.to_csv(tr_feature_file, sep='\t', index=False)
     # write out exon/intron feature file
