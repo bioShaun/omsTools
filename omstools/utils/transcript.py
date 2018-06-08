@@ -132,12 +132,20 @@ class Transcript(object):
     def length(self):
         return sum((e.end - e.start) for e in self.exons)
 
-    def add_feature_pos(self, start, end, feature):
+    def add_feature_pos(self, start, end, feature, label=None):
+        out_id = '{tr}|{ft}'.format(
+            tr=str(self.attrs["transcript_id"]),
+            ft=feature)
+        if label is not None:
+            out_id = '{oi}|{lb}'.format(
+                oi=out_id,
+                lb=label
+            )
         bed_line = [
             self.chrom,
             str(start),
             str(end),
-            str(self.attrs["transcript_id"]), '0',
+            out_id, '0',
             strand_int_to_str(self.strand),
             str(self.attrs["gene_id"]), feature
         ]
@@ -175,10 +183,12 @@ class Transcript(object):
         tss_start, tss_end = self.tss(tss_left, tss_right)
 
         bed6.append(self.add_feature_pos(tss_start, tss_end, 'tss'))
-        for exon in self.exons:
-            bed6.append(self.add_feature_pos(exon.start, exon.end, 'exon'))
-        for intron in self.iterintrons():
-            bed6.append(self.add_feature_pos(intron[0], intron[1], 'intron'))
+        for n, exon in enumerate(self.exons):
+            bed6.append(self.add_feature_pos(
+                exon.start, exon.end, 'exon', n + 1))
+        for m, intron in enumerate(self.iterintrons()):
+            bed6.append(self.add_feature_pos(
+                intron[0], intron[1], 'intron', m + 1))
         for each_line in bed6:
             yield each_line
 
@@ -329,8 +339,8 @@ def to_formatted_gtf(lines, gtf_file, attr_defs=None):
 
 def transcripts_from_gtf_lines(lines, attr_defs=None):
     transcripts = collections.OrderedDict()
-    for line in lines:
-        feature = GTFFeature.from_string(line, attr_defs)
+    for feature in GTFFeature.parse(lines, attr_defs):
+        # feature = GTFFeature.parse(line, attr_defs)
         # skip gene annotation in gtf files
         if "transcript_id" not in feature.attrs:
             continue
