@@ -32,14 +32,27 @@ def merge_files(df_list, df0=None, method='left'):
     is_flag=True,
 )
 @click.option(
+    '-bn',
+    '--by_colname',
+    is_flag=True
+)
+@click.option(
     '-na',
     '--na_rep',
     default='0'
 )
-def main(file_and_columns, output, noheader, na_rep):
+def main(file_and_columns, output, noheader, na_rep, by_colname):
     '''Merge Multi files by matched column
     '''
     # seperate files and columns
+    if by_colname:
+        table_dfs = [pd.read_table(each_file)
+                     for each_file in file_and_columns]
+        merged_df = reduce(pd.merge, table_dfs)
+        merged_df.to_csv(output, sep='\t',
+                         na_rep=na_rep, float_format='%.3f',
+                         index=False)
+        return 1
     files = list()
     columns = list()
     for n, each in enumerate(file_and_columns):
@@ -81,6 +94,7 @@ def main(file_and_columns, output, noheader, na_rep):
         header = not noheader
         merged_df.to_csv(output, sep='\t', header=header,
                          na_rep=na_rep, float_format='%.3f')
+    return 1
 
 
 if __name__ == '__main__':
