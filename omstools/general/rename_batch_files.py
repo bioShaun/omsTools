@@ -77,10 +77,24 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
     cls=MutuallyExclusiveOption,
     mutually_exclusive=['inplace'],
     help='Out directory to store renamed symbolic links of original files.')
-def main(name_map, suffix, file_dir, inplace, out_dir, prefix):
+@click.option(
+    '--new_suffix',
+    type=click.STRING,
+    default=None,
+    help='replace old suffix with new suffix.'
+)
+@click.option(
+    '--new_prefix',
+    type=click.STRING,
+    default=None,
+    help='replace old prefix with new prefix.'
+)
+def main(name_map, suffix, file_dir, inplace,
+         out_dir, prefix, new_suffix, new_prefix):
     suf_len = len(suffix)
     pre_len = len(prefix)
-    name_map_df = pd.read_table(name_map, header=None, index_col=0)
+    name_map_df = pd.read_table(name_map, delim_whitespace=True,
+                                header=None, index_col=0)
     file_dir = os.path.abspath(file_dir)
     file_list = os.listdir(file_dir)
     for each_file in file_list:
@@ -93,9 +107,15 @@ def main(name_map, suffix, file_dir, inplace, out_dir, prefix):
             each_file_path = os.path.join(file_dir, each_file)
             if each_name in name_map_df.index:
                 new_name = name_map_df.loc[each_name, 1]
+                out_suffix = suffix
+                out_prefix = prefix
+                if new_suffix:
+                    out_suffix = new_suffix
+                if new_prefix:
+                    out_prefix = new_prefix
                 if inplace:
                     new_file = os.path.join(file_dir, '{p}{n}{s}'.format(
-                        n=new_name, s=suffix, p=prefix))
+                        n=new_name, s=out_suffix, p=out_prefix))
                     os.system('mv {o} {n}'.format(
                         o=each_file_path, n=new_file))
                 else:
@@ -104,7 +124,7 @@ def main(name_map, suffix, file_dir, inplace, out_dir, prefix):
                             'If not --inplace, --out_dir option is required.')
                     out_dir = os.path.abspath(out_dir)
                     new_file = os.path.join(out_dir, '{p}{n}{s}'.format(
-                        n=new_name, s=suffix, p=prefix))
+                        n=new_name, s=out_suffix, p=out_prefix))
                     if not os.path.exists(out_dir):
                         os.makedirs(out_dir)
                     if not os.path.exists(new_file):
