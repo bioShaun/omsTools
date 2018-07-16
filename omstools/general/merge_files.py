@@ -6,7 +6,7 @@ import os
 def merge_files(df_list, df0=None, method='left'):
     if df0 is None:
         df0 = df_list.pop(0)
-        return merge_files(df_list, df0)
+        return merge_files(df_list, df0, method=method)
     elif df_list:
         df1 = df_list.pop(0)
         new_df = pd.merge(df0, df1,
@@ -37,22 +37,37 @@ def merge_files(df_list, df0=None, method='left'):
     is_flag=True
 )
 @click.option(
+    '-bh',
+    '--by_row',
+    is_flag=True
+)
+@click.option(
     '-na',
     '--na_rep',
     default='0'
 )
-def main(file_and_columns, output, noheader, na_rep, by_colname):
+@click.option(
+    '--method',
+    default='left',
+    type=click.Choice(['left', 'right', 'outer', 'inner'])
+)
+def main(file_and_columns, output, noheader, na_rep,
+         by_colname, by_row, method):
     '''Merge Multi files by matched column
     '''
     # seperate files and columns
-    if by_colname:
+    if by_colname or by_row:
         table_dfs = [pd.read_table(each_file)
                      for each_file in file_and_columns]
-        merged_df = reduce(pd.merge, table_dfs)
+        if by_colname:
+            merged_df = reduce(pd.merge, table_dfs)
+        else:
+            merged_df = pd.concat(table_dfs)
         merged_df.to_csv(output, sep='\t',
                          na_rep=na_rep, float_format='%.3f',
                          index=False)
         return 1
+
     files = list()
     columns = list()
     for n, each in enumerate(file_and_columns):
@@ -90,7 +105,7 @@ def main(file_and_columns, output, noheader, na_rep, by_colname):
                 for i in range(file_num)
             ]
         # merge files
-        merged_df = merge_files(df_list)
+        merged_df = merge_files(df_list, method=method)
         header = not noheader
         merged_df.to_csv(output, sep='\t', header=header,
                          na_rep=na_rep, float_format='%.3f')
