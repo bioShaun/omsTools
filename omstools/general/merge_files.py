@@ -1,6 +1,7 @@
 import click
 import pandas as pd
 import os
+import glob
 from omstools.utils.config import CLICK_CONTEXT_SETTINGS
 from omstools.utils.config import MutuallyExclusiveOption
 
@@ -81,7 +82,10 @@ def main(file_and_columns, output, noheader, na_rep,
     files = list()
     columns = list()
     for n, each in enumerate(file_and_columns):
-        if os.path.isfile(each):
+        if '*' in each:
+            each_files = glob.glob(each)
+            files.extend(each_files)
+        elif os.path.isfile(each):
             files.append(each)
         else:
             break
