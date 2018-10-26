@@ -1,6 +1,8 @@
 import click
 import pandas as pd
 import os
+from omstools.utils.config import CLICK_CONTEXT_SETTINGS
+from omstools.utils.config import MutuallyExclusiveOption
 
 
 def merge_files(df_list, df0=None, method='left'):
@@ -19,7 +21,7 @@ def merge_files(df_list, df0=None, method='left'):
         return df0
 
 
-@click.command()
+@click.command(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.argument(
     'file_and_columns',
     nargs=-1)
@@ -30,21 +32,29 @@ def merge_files(df_list, df0=None, method='left'):
     '-nh',
     '--noheader',
     is_flag=True,
+    help='Input tables without header.',
 )
 @click.option(
     '-bn',
     '--by_colname',
-    is_flag=True
+    is_flag=True,
+    help='Merge tables by identical columns.',
+    cls=MutuallyExclusiveOption,
+    mutually_exclusive=['by_row'],
 )
 @click.option(
     '-bh',
     '--by_row',
-    is_flag=True
+    is_flag=True,
+    help='Merge tables by row.',
+    cls=MutuallyExclusiveOption,
+    mutually_exclusive=['by_colname'],
 )
 @click.option(
     '-na',
     '--na_rep',
-    default='0'
+    default='0',
+    help='Value to replace NA in merged table. [default: 0]'
 )
 @click.option(
     '--method',
@@ -64,7 +74,7 @@ def main(file_and_columns, output, noheader, na_rep,
         else:
             merged_df = pd.concat(table_dfs)
         merged_df.to_csv(output, sep='\t',
-                         na_rep=na_rep, float_format='%.3f',
+                         na_rep=na_rep, float_format='%.5f',
                          index=False)
         return 1
 
@@ -108,7 +118,7 @@ def main(file_and_columns, output, noheader, na_rep,
         merged_df = merge_files(df_list, method=method)
         header = not noheader
         merged_df.to_csv(output, sep='\t', header=header,
-                         na_rep=na_rep, float_format='%.3f')
+                         na_rep=na_rep, float_format='%.5f')
     return 1
 
 

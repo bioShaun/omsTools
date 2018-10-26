@@ -6,7 +6,7 @@ import envoy
 
 CPU = 4
 BASH_HEADER = '#!/bin/bash'
-SPLIT_FA_NUM = 50000
+SPLIT_FA_NUM = 1000
 
 split_fa_script = '/public/scripts/omsTools/omstools/general/fa_split.py'
 

@@ -2,43 +2,13 @@ import os
 import pandas as pd
 import click
 import sys
+from omstools.utils.config import CLICK_CONTEXT_SETTINGS
+from omstools.utils.config import MutuallyExclusiveOption
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 
-class MutuallyExclusiveOption(click.Option):
-    def __init__(self, *args, **kwargs):
-        self.mutually_exclusive = set(kwargs.pop('mutually_exclusive', []))
-        help = kwargs.get('help', '')
-        if self.mutually_exclusive:
-            ex_str = ', '.join(self.mutually_exclusive)
-            kwargs['help'] = help + (
-                ' NOTE: This argument is mutually exclusive with '
-                ' arguments: [' + ex_str + '].'
-            )
-        super(MutuallyExclusiveOption, self).__init__(*args, **kwargs)
-
-    def handle_parse_result(self, ctx, opts, args):
-        if self.mutually_exclusive.intersection(opts) and self.name in opts:
-            raise click.UsageError(
-                "Illegal usage: `{}` is mutually exclusive with "
-                "arguments `{}`.".format(
-                    self.name,
-                    ', '.join(self.mutually_exclusive)
-                )
-            )
-
-        return super(MutuallyExclusiveOption, self).handle_parse_result(
-            ctx,
-            opts,
-            args
-        )
-
-
-CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
-
-
-@click.command(context_settings=CONTEXT_SETTINGS)
+@click.command(context_settings=CLICK_CONTEXT_SETTINGS)
 @click.option(
     '-n',
     '--name_map',
@@ -131,7 +101,10 @@ def main(name_map, suffix, file_dir, inplace,
                         os.system(
                             'ln -s {o} {n}'.format(
                                 o=each_file_path, n=new_file))
-                    # print 'ln -s {o} {n}'.format(o=each_file, n=new_file)
+                        # print(
+                        #     'ln -s {o} {n}'.format(
+                        #         o=each_file_path, n=new_file))
+
 
 
 if __name__ == '__main__':
