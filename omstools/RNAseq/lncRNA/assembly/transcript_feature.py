@@ -75,6 +75,16 @@ def get_gene_feature(tr_df):
     return gene_df
 
 
+def correct_key_val(mydict, key_list):
+    val = None
+    for each_key in key_list:
+        if mydict.get(each_key) is not None:
+            val = mydict.get(each_key)
+    if val is None:
+        raise KeyError
+    return val
+
+
 def add_type(func):
     '''add transcript/gene biotype to gene/transcript feature table
     '''
@@ -88,8 +98,10 @@ def add_type(func):
             for gene, tr_objs in gtf_tools['func_parse_gtf'](gtf):
                 for each_tr in tr_objs:
                     tr_id = each_tr.attrs["transcript_id"]
-                    tr_type = each_tr.attrs["transcript_biotype"]
-                    gene_type = each_tr.attrs["gene_biotype"]
+                    tr_type = correct_key_val(
+                        each_tr.attrs, ["transcript_biotype", 'transcript_type'])
+                    gene_type = correct_key_val(
+                        each_tr.attrs, ["gene_biotype", 'gene_type'])
                     tr_type_dict.setdefault('Transcript_id', []).append(tr_id)
                     tr_type_dict.setdefault('Gene_id', []).append(gene)
                     tr_type_dict.setdefault('Transcript_biotype',
