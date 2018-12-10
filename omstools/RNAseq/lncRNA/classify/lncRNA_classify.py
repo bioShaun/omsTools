@@ -58,6 +58,8 @@ def oms_lncRNA_classify(feelnc_prd, lnc_gtf, method='Luo'):
     lnc_class_df = pd.DataFrame([], columns=feelnc_best_df.columns)
     lnc_class_list = list()
     for eachline in GFF_Reader(lnc_gtf):
+        if 'transcript_id' not in eachline.attr:
+            continue
         tr_id = eachline.attr['transcript_id']
         gene_id = eachline.attr['gene_id']
         if tr_id in lnc_class_df.index:
@@ -82,7 +84,10 @@ def oms_lncRNA_classify(feelnc_prd, lnc_gtf, method='Luo'):
 
 def oms_add_lncRNA_type(lncrna, tucp, lnc_class_df, output):
     merged_gtf = '{o}.tmp'.format(o=output)
-    gtf_tools['func_merge_sort_gtf_files']([lncrna, tucp], merged_gtf)
+    if tucp:
+        gtf_tools['func_merge_sort_gtf_files']([lncrna, tucp], merged_gtf)
+    else:
+        gtf_tools['func_merge_sort_gtf_files']([lncrna], merged_gtf)
     gene_dict = dict()
     with open(merged_gtf) as gtf_inf:
         for gene, tr_objs in gtf_tools['func_parse_gtf'](gtf_inf, GTF_ATTR):

@@ -35,7 +35,10 @@ setup(
             "oms_gtf_split=omstools.general.gtf_split:main",
             "oms_transcript_feature=omstools.RNAseq.lncRNA.assembly.transcript_feature:main",
             "oms_gtf2bed=omstools.general.gtf2bed:main",
-            "oms_kill=omstools.general.killjob:main"
+            "oms_kill=omstools.general.killjob:main",
+            'oms_fa_split=omstools.general.fa_split_v2:main',
+            'oms_merge=omstools.general.merge_files:main',
+            'oms_rename=omstools.general.rename_batch_files:main'
         ],
         'gtf': [
             "func_tr_from_gtf_lines=omstools.utils.transcript:transcripts_from_gtf_lines",

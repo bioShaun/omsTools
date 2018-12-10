@@ -20,7 +20,7 @@ parser.add_argument(
     required=True)
 args = parser.parse_args()
 
-id_list = [each.strip() for each in open(args.id_list, 'r')]
+id_list = set([each.strip() for each in open(args.id_list, 'r')])
 
 my_records = []
 for seq_record in SeqIO.parse(args.all_fa, "fasta"):

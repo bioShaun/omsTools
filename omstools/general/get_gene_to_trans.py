@@ -10,6 +10,8 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--gff', help='assembled GTF file or gff', required=True)
 parser.add_argument('--out_dir', help='Output directory.', required=True)
+parser.add_argument(
+    '--ref', help='replace gene_id with ref_gene_id.', action='store_true')
 args = parser.parse_args()
 
 gene_trans_map_file = os.path.join(args.out_dir, 'gene_trans.map')
@@ -30,6 +32,9 @@ elif args.gff.endswith('gtf'):
             continue
         transcript_id = eachline.attr['transcript_id']
         gene_id = eachline.attr['gene_id']
+        ref_gene_id = eachline.attr['ref_gene_id']
+        if args.ref:
+            gene_id = ref_gene_id
         if transcript_id not in tr_dict:
             tr_dict[transcript_id] = gene_id
             gene_trans_map_file_info.write(

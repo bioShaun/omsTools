@@ -109,6 +109,9 @@ GENCODE_CATEGORY_MAP = {
     'XOI': 'lncRNA',
     'XPE': 'lncRNA',
     'XPI': 'lncRNA',
+    'SPE': 'lncRNA',
+    'SIE': 'lncRNA',
+    'SOE': 'lncRNA'
 }
 
 # gene_type classify priority
@@ -134,7 +137,7 @@ def get_gene_type(tr_types):
     for each_type in GENE_TYPE_PRIORITY:
         if each_type in re_name_tr_types:
             return each_type
-    return 'unknown'
+    return 'unkown'
 
 
 def sort_gtf(filename, output_file, tmp_dir=None):

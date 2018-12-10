@@ -75,6 +75,16 @@ def get_gene_feature(tr_df):
     return gene_df
 
 
+def correct_key_val(mydict, key_list):
+    val = None
+    for each_key in key_list:
+        if mydict.get(each_key) is not None:
+            val = mydict.get(each_key)
+            return val
+    if val is None:
+        raise KeyError
+
+
 def add_type(func):
     '''add transcript/gene biotype to gene/transcript feature table
     '''
@@ -88,8 +98,13 @@ def add_type(func):
             for gene, tr_objs in gtf_tools['func_parse_gtf'](gtf):
                 for each_tr in tr_objs:
                     tr_id = each_tr.attrs["transcript_id"]
-                    tr_type = each_tr.attrs["transcript_biotype"]
-                    gene_type = each_tr.attrs["gene_biotype"]
+                    tr_type = correct_key_val(
+                        each_tr.attrs, ["transcript_biotype", 'transcript_type'])
+                    gene_type = correct_key_val(
+                        each_tr.attrs, ["gene_biotype", 'gene_type'])
+                    gene_type = gtf_tools['func_get_tr_type'](gene_type)
+                    if gene_type != 'lncRNA':
+                        tr_type = gtf_tools['func_get_tr_type'](tr_type)
                     tr_type_dict.setdefault('Transcript_id', []).append(tr_id)
                     tr_type_dict.setdefault('Gene_id', []).append(gene)
                     tr_type_dict.setdefault('Transcript_biotype',
@@ -232,7 +247,12 @@ def get_summary(df, cat_col, stat_col):
     help='add transcript/gene biotype to feature table.',
     is_flag=True,
 )
-def main(gtf, out_dir, biotype):
+@click.option(
+    '--plot',
+    help='generate feature plot.',
+    is_flag=True
+)
+def main(gtf, out_dir, biotype, plot):
     '''Extract basic information of gene/transcript/exon/intron from gtf file
     '''
     # insure out_dir exists
@@ -251,12 +271,15 @@ def main(gtf, out_dir, biotype):
     # filter tr_feature_df lncRNA in protein coding gene
     tr_feature_df = tr_feature_df[~((tr_feature_df.Gene_biotype == "protein_coding") &
                                     (tr_feature_df.Transcript_biotype != "protein_coding"))]
+    exon_intron_df = exon_intron_df[~((exon_intron_df.Gene_biotype == "protein_coding") &
+                                      (exon_intron_df.Transcript_biotype != "protein_coding"))]
     # write out transcript feature file
     tr_feature_df.to_csv(tr_feature_file, sep='\t', index=False)
     # write out exon/intron feature file
     exon_intron_df.to_csv(exon_intron_feature_file, sep='\t', index=False)
     # plot output
-    plot_feature(out_dir)
+    if plot:
+        plot_feature(out_dir)
     # output summary
     if biotype:
         gene_feature_summary = os.path.join(

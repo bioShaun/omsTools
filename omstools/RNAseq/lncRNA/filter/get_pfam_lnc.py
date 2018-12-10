@@ -1,17 +1,22 @@
 import pandas as pd
 import click
 import glob
+import sys
 
 
 def read_split_pfam(split_pfam_dir):
     pfam_df_list = list()
     split_pfam_out = glob.glob('{d}/*pfamA'.format(d=split_pfam_dir))
     for each_pfam in split_pfam_out:
-        each_pfam_df = pd.read_table(each_pfam, header=None,
-                                     delim_whitespace=True,
-                                     skip_blank_lines=True,
-                                     comment="#")
-        pfam_df_list.append(each_pfam_df)
+        try:
+            each_pfam_df = pd.read_table(each_pfam, header=None,
+                                         delim_whitespace=True,
+                                         skip_blank_lines=True,
+                                         comment="#")
+        except pd.errors.EmptyDataError:
+            continue
+        else:
+            pfam_df_list.append(each_pfam_df)
     pfam_df = pd.concat(pfam_df_list)
     return pfam_df
 

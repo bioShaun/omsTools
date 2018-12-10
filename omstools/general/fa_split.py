@@ -16,6 +16,8 @@ if not os.path.exists(output_dir):
 file_name = output_dir + "/split_fa_" + str(file_number) + ".fa"
 split_fa = open(file_name, "w")
 
+split_fa_dict = dict()
+
 with open(sys.argv[1], "r") as input_fasta:
     for seq_record in SeqIO.parse(input_fasta, "fasta"):
         number += 1
