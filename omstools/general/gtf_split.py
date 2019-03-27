@@ -17,7 +17,7 @@ def gtf_classifier(line, method):
                 tag_value = gtf_tools['func_get_tr_type'](tag_value)
             return tag_value
     elif method == 'chr':
-        return line.chrom
+        return line.seqid
     else:
         sys.exit('unknown method')
 

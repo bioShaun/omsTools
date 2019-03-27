@@ -32,9 +32,8 @@ elif args.gff.endswith('gtf'):
             continue
         transcript_id = eachline.attr['transcript_id']
         gene_id = eachline.attr['gene_id']
-        ref_gene_id = eachline.attr['ref_gene_id']
-        if args.ref:
-            gene_id = ref_gene_id
+        if args.ref and 'ref_gene_id' in eachline.attr:
+            gene_id = eachline.attr['ref_gene_id']
         if transcript_id not in tr_dict:
             tr_dict[transcript_id] = gene_id
             gene_trans_map_file_info.write(

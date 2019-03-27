@@ -20,11 +20,16 @@ for eachline in GFF_Reader(gtf):
     chrom = eachline.iv.chrom
     start = eachline.iv.start + 1
     end = eachline.iv.end
-    for each_inter in chr_dict[chrom]:
-        if start >= each_inter[0] and end <= each_inter[1]:
-            new_chr = chr_dict[chrom][each_inter]
-            new_start = start - each_inter[0] + 1
-            new_end = end - each_inter[0] + 1
+    if chrom in chr_dict:
+        for each_inter in chr_dict[chrom]:
+            if start >= each_inter[0] and end <= each_inter[1]:
+                new_chr = chr_dict[chrom][each_inter]
+                new_start = start - each_inter[0] + 1
+                new_end = end - each_inter[0] + 1
+    else:
+        new_chr = chrom
+        new_start = start
+        new_end = end
     output_line = eachline.get_gff_line().strip().split('\t')
     output_line[0] = new_chr
     output_line[3] = str(new_start)
