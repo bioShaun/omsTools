@@ -62,8 +62,12 @@ def merge_files(df_list, df0=None, method='left'):
     default='left',
     type=click.Choice(['left', 'right', 'outer', 'inner'])
 )
+@click.option(
+    '--float_format',
+    default=None
+)
 def main(file_and_columns, output, noheader, na_rep,
-         by_colname, by_row, method):
+         by_colname, by_row, method, float_format):
     '''Merge Multi files by matched column
     '''
     # seperate files and columns
@@ -75,7 +79,7 @@ def main(file_and_columns, output, noheader, na_rep,
         else:
             merged_df = pd.concat(table_dfs)
         merged_df.to_csv(output, sep='\t',
-                         na_rep=na_rep, float_format='%.5f',
+                         na_rep=na_rep, float_format=float_format,
                          index=False)
         return 1
 
@@ -122,7 +126,7 @@ def main(file_and_columns, output, noheader, na_rep,
         merged_df = merge_files(df_list, method=method)
         header = not noheader
         merged_df.to_csv(output, sep='\t', header=header,
-                         na_rep=na_rep, float_format='%.5f')
+                         na_rep=na_rep, float_format=float_format)
     return 1
 
 
