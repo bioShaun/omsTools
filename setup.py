@@ -22,7 +22,7 @@ setup(
     install_requires=[
         'envoy',
         'pandas==0.22.0',
-        'numpy=1.13.3',
+        'numpy==1.13.3',
         'HTSeq',
         'click',
         'distribute',
