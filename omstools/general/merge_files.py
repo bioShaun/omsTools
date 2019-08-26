@@ -6,18 +6,23 @@ from omstools.utils.config import CLICK_CONTEXT_SETTINGS
 from omstools.utils.config import MutuallyExclusiveOption
 
 
-def merge_files(df_list, df0=None, method='left'):
+def merge_files(df_list, df0=None, method='left', by='index'):
     if df0 is None:
         df0 = df_list.pop(0)
-        return merge_files(df_list, df0, method=method)
+        return merge_files(df_list, df0, method=method, by=by)
     elif df_list:
         df1 = df_list.pop(0)
-        new_df = pd.merge(df0, df1,
-                          left_index=True,
-                          right_index=True,
-                          how=method)
-        new_df.index.name = df0.index.name
-        return merge_files(df_list, df0=new_df, method=method)
+        if by == 'index':
+            new_df = pd.merge(df0, df1,
+                              left_index=True,
+                              right_index=True,
+                              how=method)
+            new_df.index.name = df0.index.name
+        else:
+            new_df = pd.merge(df0, df1,
+                              how=method)
+        return merge_files(df_list, df0=new_df,
+                           method=method, by=by)
     else:
         return df0
 
@@ -75,7 +80,7 @@ def main(file_and_columns, output, noheader, na_rep,
         table_dfs = [pd.read_table(each_file)
                      for each_file in file_and_columns]
         if by_colname:
-            merged_df = reduce(pd.merge, table_dfs)
+            merged_df = merge_files(table_dfs, method=method, by='column')
         else:
             merged_df = pd.concat(table_dfs)
         merged_df.to_csv(output, sep='\t',

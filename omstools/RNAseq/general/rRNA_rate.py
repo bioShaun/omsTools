@@ -10,7 +10,7 @@ sample_file = sys.argv[1]
 mapping_dir = sys.argv[2]
 summary = sys.argv[3]
 
-sample_list = [each.strip().split()[1] for each in open(sample_file)]
+sample_list = [each.strip().split()[0] for each in open(sample_file)]
 
 summary_info = open(summary, 'w')
 summary_info.write('Sample_ID\trRNA_rate\n')

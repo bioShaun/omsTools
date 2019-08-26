@@ -1,6 +1,10 @@
 from HTSeq import GFF_Reader
 import sys
 
+if not len(sys.argv) == 3:
+    print "python " + sys.argv[0] + "split_bed gtf_file\n"
+    sys.exit(0)
+
 bed = sys.argv[1]
 gtf = sys.argv[2]
 

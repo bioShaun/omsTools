@@ -21,7 +21,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'envoy',
-        'pandas',
+        'pandas<=0.24.2',
         'HTSeq',
         'click',
         'distribute',
